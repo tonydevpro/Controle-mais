@@ -1,0 +1,38 @@
+# Ignora node_modules
+node_modules/
+
+# Ignora arquivos de log
+logs
+*.log
+npm-debug.log*
+
+# Ignora variáveis de ambiente
+.env
+.env.*  
+
+# Ignora pastas temporárias
+tmp/
+temp/
+*.tmp
+
+# Ignora arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ignora pastas de build/output
+dist/
+build/
+
+# Ignora banco de dados local, se houver
+*.sqlite
+*.sqlite3
+
+# Ignora arquivos de teste de cobertura
+coverage/
+
+# Ignora arquivos de configuração do editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+

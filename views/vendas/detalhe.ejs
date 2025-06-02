@@ -1,0 +1,33 @@
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/vendas.css" />
+
+<h2>Detalhes da Venda #<%= venda.id %></h2>
+<p><strong>Data:</strong> <%= new Date(venda.data).toLocaleString() %></p>
+<p><strong>Total:</strong> R$ <%= Number(venda.total).toFixed(2) %></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Quantidade</th>
+      <th>Preço Unitário</th>
+      <th>Desconto</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% itens.forEach(item => { %>
+      <tr>
+        <td><%= item.nome %></td>
+        <td><%= item.quantidade %></td>
+        <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
+        <td>R$ <%= Number(item.desconto).toFixed(2) %></td>
+        <td>R$ <%= Number((item.preco_unitario - item.desconto) * item.quantidade).toFixed(2) %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<a href="/vendas">← Voltar</a>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Movimentação</title>
+  <link rel="stylesheet" href="/css/formEditar.css">
+</head>
+<body>
+  <h1>Editar Movimentação</h1>
+  
+  <form action="/movimentacoes/editarMov/<%= movimentacao.id %>" method="POST">
+    
+    <label>Produto:</label>
+    <select name="produto_id" required>
+      <% produtos.forEach(produto => { %>
+        <option value="<%= produto.id %>" <%= produto.id === movimentacao.produto_id ? 'selected' : '' %> >
+          <%= produto.nome %>
+        </option>
+      <% }); %>
+    </select>
+    <br/>
+
+    <label>Tipo:</label>
+    <select name="tipo" required>
+      <option value="entrada" <%= movimentacao.tipo === 'entrada' ? 'selected' : '' %> >Entrada</option>
+      <option value="saida" <%= movimentacao.tipo === 'saida' ? 'selected' : '' %> >Saída</option>
+    </select>
+    <br/>
+
+    <label>Quantidade:</label>
+    <input type="number" name="quantidade" step="1" min="1" required value="<%= movimentacao.quantidade %>" />
+    <br/>
+
+    <label>Observação:</label>
+    <textarea name="observacao"><%= movimentacao.observacao %></textarea>
+    <br/>
+
+    <button type="submit">Atualizar</button>
+  </form>
+
+  <a href="/movimentacoes">Voltar</a>
+
+  <%- include('../partials/footer.ejs') %>
+</body>
+</html>

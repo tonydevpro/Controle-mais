@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f9f9f9;
+  color: #2d2d29;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  padding: 2em;
+  max-width: 1200px;
+  margin: auto;
+}

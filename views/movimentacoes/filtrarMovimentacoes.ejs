@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Relatório de Movimentações</title>
+  <link rel="stylesheet" href="/css/filtrarMovimentacoes.css" />
+</head>
+<body>
+
+    <%- include('../partials/header', { usuario: usuario }) %>
+
+  <div class="pagina-filtrar">
+  <h1>Relatório de Movimentações</h1>
+  <form action="/movimentacoes/relatorio" method="POST">
+    <label>Data Inicial:</label>
+    <input type="date" name="dataInicio" required><br>
+
+    <label>Data Final:</label>
+    <input type="date" name="dataFim" required><br>
+
+    <button type="submit">Buscar</button>
+  </form>
+  <a href="/produtos">Voltar</a>
+</div>
+  <%- include('../partials/footer.ejs') %>
+</body>
+</html>

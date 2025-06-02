@@ -1,0 +1,79 @@
+.pagina-filtrar {
+  padding-top: 80px; /* espaço para header fixo */
+  max-width: 600px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background-color: #fefefe;
+}
+
+.pagina-filtrar h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #215a6d;
+  font-size: 2rem;
+}
+
+.pagina-filtrar form {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pagina-filtrar label {
+  font-weight: bold;
+  color: #333;
+}
+
+.pagina-filtrar input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.pagina-filtrar button {
+  padding: 10px 20px;
+  background-color: #215a6d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagina-filtrar button:hover {
+  background-color: #3ca2a2;
+}
+
+.pagina-filtrar a {
+  display: block;
+  margin-top: 25px;
+  text-align: center;
+  color: #215a6d;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.pagina-filtrar a:hover {
+  color: #3ca2a2;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .pagina-filtrar form {
+    padding: 20px;
+  }
+
+  .pagina-filtrar h1 {
+    font-size: 1.5rem;
+  }
+}

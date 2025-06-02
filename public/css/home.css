@@ -1,0 +1,10 @@
+.container h1 {
+  font-size: 2rem;
+  color: #215a6d;
+  margin-bottom: 0.5em;
+}
+
+.container p {
+  font-size: 1.1rem;
+  color: #3ca2a2;
+}

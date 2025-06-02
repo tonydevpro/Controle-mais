@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="/css/header.css">
+<header >
+  <h1><a href="/" >Controle+</a></h1>
+
+  <% if (usuario) { %>
+    <nav>
+      <button id="menu-toggle">&#9776;</button>
+  <ul id="menu">
+    <li><a href="/">Início</a></li>
+    <li><a href="/produtos">Produtos</a></li>
+    <li><a href="/movimentacoes">Movimentações</a></li>
+    <li><a href="/dashboard/financeiro">Financeiro</a></li>
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/pdv">PDV</a></li>
+    <li><a href="/vendas">Vendas</a></li>
+    <li><a href="/vendas/relatorio">Relatório</a></li>
+    <li><a href="/usuario/gerenciar">Usuários</a></li>
+    
+    <li><a href="/logout">Sair</a></li>
+  </ul>
+</nav>
+
+  <% } else { %>
+    <nav>
+      <a href="/login" style="margin-right: 1rem; color: white;">Login</a>
+      <a href="/registrar" style="color: white;">Registrar</a>
+    </nav>
+  <% } %>
+
+  <script>
+  document.getElementById('menu-toggle')?.addEventListener('click', function () {
+    document.getElementById('menu')?.classList.toggle('show');
+  });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</header>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrar Movimentação</title>
+  <link rel="stylesheet" href="/css/formEditar.css" />
+</head>
+<body>
+  <!--nav-->
+  
+  
+  <h1>Registrar Movimentação</h1>
+  
+  <form action="/movimentacoes/Registrar" method="POST">
+    <label>Produto:</label>
+    <select name="produto_id" required>
+      <% produtos.forEach(produto => { %>
+        <option value="<%= produto.id %>"><%= produto.nome %></option>
+      <% }) %>
+    </select><br/><br/>
+
+    <label>Tipo de Movimentação:</label>
+    <select name="tipo" required>
+      <option value="entrada">Entrada</option>
+      <option value="saida">Saída</option>
+    </select><br/><br/>
+
+    <label>Quantidade:</label>
+    <input type="number" name="quantidade" min="1" required /><br/><br/>
+
+    <label>Observação:</label>
+    <textarea name="observacao"></textarea><br/><br/>
+
+    <button type="submit">Registrar</button>
+  </form>
+
+  <a href="/produtos">Voltar</a>
+
+  <%- include('../partials/footer.ejs') %>
+  
+</body>
+</html>

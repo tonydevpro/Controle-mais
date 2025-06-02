@@ -1,0 +1,153 @@
+.pagina-financeiro {
+  padding-top: 80px; /* espaço para o header fixo */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background-color: #fefefe;
+}
+
+.pagina-financeiro h1,
+.pagina-financeiro h2 {
+  text-align: center;
+  color: #215a6d;
+  margin-bottom: 1rem;
+}
+
+.pagina-financeiro form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.pagina-financeiro label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: #333;
+}
+
+.pagina-financeiro input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 180px;
+}
+
+.pagina-financeiro button,
+.pagina-financeiro a {
+  padding: 10px 20px;
+  background-color: #215a6d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.pagina-financeiro button:hover,
+.pagina-financeiro a:hover {
+  background-color: #3ca2a2;
+}
+
+/* Gráficos */
+canvas {
+  width: 100% !important;
+  height: auto !important;
+  margin-bottom: 2rem;
+}
+
+/* Lista de dados */
+.pagina-financeiro ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 2rem 0;
+}
+
+.pagina-financeiro ul li {
+  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+}
+
+/* Tabela */
+.pagina-financeiro table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 3rem;
+  font-size: 0.95rem;
+}
+
+.pagina-financeiro table th,
+.pagina-financeiro table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.pagina-financeiro table th {
+  background-color: #215a6d;
+  color: white;
+}
+
+.pagina-financeiro table tr:nth-child(even) {
+  background-color: #f4f4f4;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .pagina-financeiro form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pagina-financeiro input[type="date"] {
+    width: 100%;
+  }
+
+  .pagina-financeiro table {
+    font-size: 0.85rem;
+  }
+}
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.kpi-card {
+  background-color: #215a6d;
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: scale(1.03);
+}
+
+.kpi-card h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #dfece6;
+}
+
+.kpi-card p {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 0;
+}

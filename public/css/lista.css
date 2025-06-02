@@ -1,0 +1,161 @@
+/* Escopo específico para a página lista */
+.pagina-lista {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9f9f9;
+  color: #2d2d29;
+  padding: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pagina-lista h1, 
+.pagina-lista h2 {
+  color: #215a6d;
+}
+
+.pagina-lista h1 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.pagina-lista h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.pagina-lista a {
+  color: #3ca2a2;
+  font-weight: 600;
+  text-decoration: none;
+  margin-right: 1rem;
+  transition: color 0.3s ease;
+}
+
+.pagina-lista a:hover {
+  text-decoration: underline;
+  color: #215a6d;
+}
+
+/* Links "Adicionar Produto" e "Histórico de Movimentações" num bloco separado */
+.pagina-lista > a {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+/* Formulário de importação */
+.pagina-lista form {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagina-lista input[type="file"] {
+  flex: 1 1 300px;
+  padding: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.pagina-lista button {
+  background-color: #215a6d;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.pagina-lista button:hover {
+  background-color: #3ca2a2;
+}
+
+/* Caixa exemplo de importação CSV */
+.pagina-lista .exemploImportar {
+  background-color: #dfece6;
+  padding: 1rem;
+  border-radius: 6px;
+  max-width: 500px;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: #215a6d;
+  box-shadow: inset 0 0 8px #b3d1cb;
+}
+
+/* Lista de produtos */
+.pagina-lista ul {
+  list-style: none;
+  padding-left: 0;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.pagina-lista ul li {
+  background-color: white;
+  margin-bottom: 0.8rem;
+  padding: 1rem;
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(33, 90, 109, 0.1);
+  gap: 1rem;
+  font-size: 1rem;
+}
+
+.pagina-lista ul li strong {
+  margin-right: 0.5rem;
+  color: #215a6d;
+  font-weight: 600;
+}
+
+.pagina-lista ul li form {
+  margin: 0 0 0 1rem;
+}
+
+.pagina-lista ul li button {
+  background-color: #c0392b;
+  padding: 0.4rem 0.8rem;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.pagina-lista ul li button:hover {
+  background-color: #e74c3c;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .pagina-lista {
+    padding: 1rem;
+  }
+
+  .pagina-lista ul li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagina-lista ul li form {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  .pagina-lista form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagina-lista input[type="file"] {
+    flex: unset;
+    width: 100%;
+  }
+}

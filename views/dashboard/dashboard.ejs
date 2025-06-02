@@ -1,0 +1,164 @@
+
+<body>
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/dashboard.css">
+
+
+<h1>📊 Dashboard - Controle+</h1>
+
+<form method="GET" action="/dashboard">
+  <div>
+    <label>De: <input type="date" name="data_inicio" value="<%= data_inicio || '' %>"></label>
+    <label>Até: <input type="date" name="data_fim" value="<%= data_fim || '' %>"></label>
+    
+    <label>Produto:
+      <select name="produto_id">
+        <option value="">Todos</option>
+        <% produtos.forEach(p => { %>
+          <option value="<%= p.id %>" <%= produto_id == p.id ? 'selected' : '' %>><%= p.nome %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label>Tipo:
+      <select name="tipo">
+        <option value="">Todos</option>
+        <option value="entrada" <%= tipo === 'entrada' ? 'selected' : '' %>>Entrada</option>
+        <option value="saida" <%= tipo === 'saida' ? 'selected' : '' %>>Saída</option>
+      </select>
+    </label>
+
+    <button type="submit">Filtrar</button>
+    <a href="/dashboard">Limpar</a>
+  </div>
+</form>
+
+<hr>
+
+<section class="kpi-cards">
+  <div class="kpi-card produtos">
+    <div class="icon">📦</div>
+    <h3>Produtos</h3>
+    <p><%= totalProdutos %></p>
+  </div>
+  <div class="kpi-card estoque">
+    <div class="icon">📊</div>
+    <h3>Em Estoque</h3>
+    <p><%= totalQuantidade %></p>
+  </div>
+  <div class="kpi-card custo">
+    <div class="icon">💲</div>
+    <h3>Custo Total</h3>
+    <p>R$ <%= valorTotalCusto %></p>
+  </div>
+  <div class="kpi-card estimado">
+    <div class="icon">🛒</div>
+    <h3>Valor Estoque</h3>
+    <p>R$ <%= valorTotalEstoque.toFixed(2) %></p>
+  </div>
+  <div class="kpi-card lucro">
+    <div class="icon">📈</div>
+    <h3>Lucro Estimado</h3>
+    <p>R$ <%= lucroTotal %></p>
+  </div>
+</section>
+
+
+
+<section>
+  <h2>Resumo</h2>
+  <ul>
+    <li>Total de produtos: <%= totalProdutos %></li>
+    <li>Total em estoque: <%= totalQuantidade %></li>
+    <li>Valor Total de Custo: R$ <%= valorTotalCusto %></li>
+    <li>Valor total estimado: R$ <%= valorTotalEstoque.toFixed(2) %></li>
+    <li>Lucro estimado: R$ <%= lucroTotal %></li>
+  </ul>
+</section>
+
+<hr>
+
+<section>
+  <h2>Gráfico de Movimentações</h2>
+  <canvas id="graficoMovimentacoes" width="600" height="300"></canvas>
+</section>
+
+<hr>
+
+<section>
+  <h2>Movimentações Detalhadas</h2>
+  <a href="/exportar/pdf?<%= new URLSearchParams({ data_inicio, data_fim }).toString() %>">📄 Exportar PDF</a>
+  <a href="/exportar/csv?<%= new URLSearchParams({ data_inicio, data_fim }).toString() %>">🧾 Exportar CSV</a>
+
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Produto</th>
+        <th>Tipo</th>
+        <th>Quantidade</th>
+        <th>Observação</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% movimentacoesDetalhadas.forEach(m => { %>
+        <tr>
+          <td><%= new Date(m.data).toLocaleDateString() %></td>
+          <td><%= m.produto %></td>
+          <td><%= m.tipo %></td>
+          <td><%= m.quantidade %></td>
+          <td><%= m.observacao || '' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const dados = <%- JSON.stringify(movimentacoes) %>;
+
+  const datas = [...new Set(dados.map(m => m.data))];
+  const entradas = datas.map(d => {
+    const mov = dados.find(m => m.data === d && m.tipo === 'entrada');
+    return mov ? mov.total : 0;
+  });
+  const saidas = datas.map(d => {
+    const mov = dados.find(m => m.data === d && m.tipo === 'saida');
+    return mov ? mov.total : 0;
+  });
+
+  const ctx = document.getElementById('graficoMovimentacoes').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datas,
+      datasets: [
+        {
+          label: 'Entradas',
+          data: entradas,
+          borderColor: 'green',
+          fill: false
+        },
+        {
+          label: 'Saídas',
+          data: saidas,
+          borderColor: 'red',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+<%- include('../partials/footer.ejs') %>
+
+
+
+</body>
+</html>

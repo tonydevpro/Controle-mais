@@ -1,0 +1,112 @@
+
+    <%- include('../partials/header', { usuario: usuario }) %>
+    <link rel="stylesheet" href="/css/pdv.css" />
+<h2>PDV - Venda Rápida</h2>
+
+<form id="form-venda">
+  <select id="produto">
+    <option disabled selected>Selecione um produto</option>
+    <% produtos.forEach(p => { %>
+      <option value="<%= p.id %>" data-preco="<%= p.preco_venda %>" data-disponivel="<%= p.quantidade %>">
+        <%= p.nome %> (Estoque: <%= p.quantidade %>)
+      </option>
+    <% }) %>
+  </select>
+
+  <input type="number" id="quantidade" placeholder="Quantidade" min="1" />
+  <input type="number" id="desconto" placeholder="Desconto R$" min="0" step="0.01" />
+  
+  <button type="button" onclick="adicionarItem()">Adicionar</button>
+
+  <table id="tabela-itens">
+    <thead>
+      <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Desconto</th><th>ação</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <p><strong>Total:</strong> R$ <span id="total-venda">0.00</span></p>
+  <button type="submit">Finalizar Venda</button>
+</form>
+
+<script>
+  const itens = [];
+
+    excluirItem = (index) => {
+    itens.splice(index, 1);
+    atualizarTabela();
+    atualizarTotal();
+  };
+  function atualizarTabela() {
+  const tbody = document.querySelector('#tabela-itens tbody');
+  tbody.innerHTML = '';
+
+  itens.forEach((item, index) => {
+    const total = item.quantidade * item.preco_unitario;
+    const totalComDesconto = (item.quantidade * item.preco_unitario) - item.desconto;
+    const linha = `
+      <tr>
+        <td>${item.nome}</td>
+        <td>${item.quantidade}</td>
+        <td>R$ ${item.preco_unitario.toFixed(2)}</td>
+        <td>R$ ${total.toFixed(2)}</td>
+        <td>R$ ${totalComDesconto.toFixed(2)}</td
+        <td><button type="button" onclick="excluirItem(${index})">Excluir</button></td>
+      </tr>
+    `;
+    tbody.innerHTML += linha;
+  });
+
+  atualizarTotal();
+}
+
+
+  function adicionarItem() {
+  const select = document.getElementById('produto');
+  const quantidade = parseInt(document.getElementById('quantidade').value);
+  const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+  const option = select.options[select.selectedIndex];
+  const nome = option.text;
+  const preco = parseFloat(option.dataset.preco);
+  const disponivel = parseInt(option.dataset.disponivel);
+  const produto_id = parseInt(option.value);
+
+  if (!quantidade || quantidade <= 0 || quantidade > disponivel) {
+    return alert('Quantidade inválida.');
+  }
+
+  if (desconto > preco * quantidade) {
+    return alert('Desconto não pode ser maior que o valor total.');
+  }
+
+  itens.push({ produto_id, nome, quantidade, preco_unitario: preco, desconto });
+  atualizarTabela();
+}
+
+
+  function atualizarTotal() {
+  const total = itens.reduce((soma, i) => soma + (i.quantidade * i.preco_unitario - i.desconto), 0);
+  document.getElementById('total-venda').innerText = total.toFixed(2);
+}
+
+
+  document.getElementById('form-venda').addEventListener('submit', async e => {
+    e.preventDefault();
+    const res = await fetch('/pdv/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itens })
+    });
+    const json = await res.json();
+    if (json.sucesso) {
+      alert('Venda realizada com sucesso!');
+      location.reload();
+    } else {
+      alert('Erro ao finalizar venda.');
+    }
+  });
+</script>
+<%- include('../partials/footer.ejs') %>
+
+    
+

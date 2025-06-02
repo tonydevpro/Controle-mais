@@ -1,0 +1,117 @@
+.pagina-lista {
+  padding-top: 80px; /* espaço para o header fixo */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.pagina-lista h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #215a6d;
+}
+
+.pagina-lista table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pagina-lista th,
+.pagina-lista td {
+  padding: 12px 15px;
+  text-align: center;
+}
+
+.pagina-lista th {
+  background-color: #215a6d;
+  color: white;
+  font-weight: bold;
+}
+
+.pagina-lista tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.pagina-lista tr:hover {
+  background-color: #e6f0f2;
+}
+
+.pagina-lista td button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagina-lista td button:hover {
+  background-color: #c0392b;
+}
+
+.pagina-lista a {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #215a6d;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.pagina-lista a:hover {
+  color: #3ca2a2;
+}
+
+/* Ações lado a lado */
+.pagina-lista td form {
+  display: inline;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .pagina-lista table,
+  .pagina-lista thead,
+  .pagina-lista tbody,
+  .pagina-lista th,
+  .pagina-lista td,
+  .pagina-lista tr {
+    display: block;
+  }
+
+  .pagina-lista thead {
+    display: none;
+  }
+
+  .pagina-lista tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+  }
+
+  .pagina-lista td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+
+  .pagina-lista td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 15px;
+    width: 45%;
+    padding-left: 10px;
+    font-weight: bold;
+    text-align: left;
+  }
+}

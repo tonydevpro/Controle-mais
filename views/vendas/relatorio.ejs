@@ -1,0 +1,80 @@
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/relatorio.css" />
+
+<h2>Relatório de Vendas</h2>
+
+<a href="/vendas/relatorio/pdf" class="botao-pdf" target="_blank">📄 Baixar PDF (7 dias)</a>
+
+<div class="relatorios-container">
+
+  <div class="tabela-bloco">
+    <h3>Totais por Dia (Últimos 7 dias)</h3>
+    <table>
+      <thead>
+        <tr><th>Dia</th><th>Total (R$)</th></tr>
+      </thead>
+      <tbody>
+        <% totaisDia.forEach(d => { %>
+          <tr>
+            <td><%= d.dia.toISOString().slice(0,10) %></td>
+            <td>R$ <%= parseFloat(d.total).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tabela-bloco">
+    <h3>Totais por Semana (Últimas 4 semanas)</h3>
+    <table>
+      <thead>
+        <tr><th>Semana (YYYYWW)</th><th>Total (R$)</th></tr>
+      </thead>
+      <tbody>
+        <% totaisSemana.forEach(s => { %>
+          <tr>
+            <td><%= s.semana %></td>
+            <td>R$ <%= parseFloat(s.total).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tabela-bloco">
+    <h3>Totais por Mês (Últimos 12 meses)</h3>
+    <table>
+      <thead>
+        <tr><th>Mês</th><th>Total (R$)</th></tr>
+      </thead>
+      <tbody>
+        <% totaisMes.forEach(m => { %>
+          <tr>
+            <td><%= m.mes %></td>
+            <td>R$ <%= parseFloat(m.total).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tabela-bloco">
+    <h3>Totais por Ano (Últimos 5 anos)</h3>
+    <table>
+      <thead>
+        <tr><th>Ano</th><th>Total (R$)</th></tr>
+      </thead>
+      <tbody>
+        <% totaisAno.forEach(a => { %>
+          <tr>
+            <td><%= a.ano %></td>
+            <td>R$ <%= parseFloat(a.total).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<%- include('../partials/footer.ejs') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/vendas.css" />
+
+<h2>Histórico de Vendas</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>N</th>
+      <th>Data</th>
+      <th>Total</th>
+    <th>Detalhes</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (vendas.length === 0) { %>
+      <tr><td colspan="4">Nenhuma venda registrada.</td></tr>
+    <% } else { %>
+      <% vendas.forEach(v => { %>
+        <tr>
+          <td><%= v.id %></td>
+          <td><%= new Date(v.data).toLocaleString() %></td>
+          <td>R$ <%= (v.total ? Number(v.total) : 0).toFixed(2) %></td>
+          <td><a href="/vendas/<%= v.id %>">Ver Detalhes</a></td>
+            <td>
+                
+          <form action="/vendas/excluir/<%= v.id %>" method="POST" style="display:inline" onsubmit="return confirm('Confirma exclusão da venda #<%= v.id %>?')">
+            <button type="submit" style="background:none; border:none; color:red; cursor:pointer;">Excluir</button>
+          </form>
+            </td>
+        </tr>
+      <% }) %>
+    <% } %>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>
