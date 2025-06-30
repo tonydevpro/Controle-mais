@@ -1,6 +1,13 @@
 
 <body>
 <%- include('../partials/header', { usuario: usuario }) %>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<!-- jQuery (necessário para DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
 <link rel="stylesheet" href="/css/dashboard.css">
 
 
@@ -90,7 +97,7 @@
   <a href="/exportar/pdf?<%= new URLSearchParams({ data_inicio, data_fim }).toString() %>">📄 Exportar PDF</a>
   <a href="/exportar/csv?<%= new URLSearchParams({ data_inicio, data_fim }).toString() %>">🧾 Exportar CSV</a>
 
-  <table border="1" cellpadding="5" cellspacing="0">
+  <table id="tabelaMovimentacoes" border="1" cellpadding="5" cellspacing="0">
     <thead>
       <tr>
         <th>Data</th>
@@ -156,6 +163,27 @@
     }
   });
 </script>
+<script>
+  $(document).ready(function() {
+    $('#tabelaMovimentacoes').DataTable({
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      order: [[0, 'desc']], // ordena pela coluna de data decrescente
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_ registros",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        paginate: {
+          first: "Primeiro",
+          last: "Último",
+          next: "Próximo",
+          previous: "Anterior"
+        }
+      }
+    });
+  });
+</script>
+
 <%- include('../partials/footer.ejs') %>
 
 

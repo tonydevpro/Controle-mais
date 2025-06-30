@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Histórico de Movimentações</title>
   <link rel="stylesheet" href="/css/listarMovimentacoes.css">
+  <!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
 </head>
 <body>
     <%- include('../partials/header', { usuario: usuario }) %>
@@ -11,7 +14,7 @@
 <div class="pagina-lista">
   <h1>Histórico de Movimentações</h1>
 
-  <table border="1" cellpadding="8">
+  <table id="tabelaMovimentacoes" border="1" cellpadding="8">
     <thead>
       <tr>
         <th>ID</th>
@@ -23,6 +26,7 @@
         
         <th>Preço Custo</th>
         <th>Preço Venda</th>
+        <th>Valor Total</th>
         <th>Ações</th>
       </tr>
     </thead>
@@ -37,6 +41,10 @@
   <td data-label="Observação"><%= m.observacao %></td>
   <td data-label="Preço Custo"><%= Number(m.preco_custo).toFixed(2) %></td>
   <td data-label="Preço Venda"><%= Number(m.preco_venda).toFixed(2) %></td>
+  <td data-label="Valor Total">
+  R$ <%= (m.quantidade * (m.tipo === 'entrada' ? m.preco_custo : m.preco_venda)).toFixed(2) %>
+  </td>
+
   <td data-label="Ações">
     <a href="/movimentacoes/editarMov/<%= m.id %>">Editar</a> |
     <form action="/movimentacoes/excluirMov/<%= m.id %>" method="POST" style="display:inline;">
@@ -55,6 +63,32 @@
   <a href="/movimentacoes/relatorio">Relatorio de Movimentação</a>
   <a href="/produtos">Voltar aos produtos</a>
 </div>
+<!-- jQuery (necessário para DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#tabelaMovimentacoes').DataTable({
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      order: [[4, 'desc']], // ordena pela data desc (5ª coluna, índice 4)
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_ registros",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        paginate: {
+          first: "Primeiro",
+          last: "Último",
+          next: "Próximo",
+          previous: "Anterior"
+        }
+      }
+    });
+  });
+</script>
+
   <%- include('../partials/footer.ejs') %>
 </body>
 </html>

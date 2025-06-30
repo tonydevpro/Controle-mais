@@ -1,5 +1,12 @@
 <link rel="stylesheet" href="/css/dashboardFinanceiro.css">
 <%- include('../partials/header') %>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
 <div class="pagina-financeiro">
 <form method="GET" action="/dashboard/financeiro">
   <label>De: <input type="date" name="data_inicio" value="<%= data_inicio || '' %>"></label>
@@ -101,8 +108,28 @@
       }
     }
   });
-</script>
 
+
+
+</script>
+<script>  $(document).ready(function() {
+  $('#tabelaMargem').DataTable({
+    // Você pode personalizar opções aqui, ex:
+    pageLength: 10,     // itens por página
+    lengthMenu: [5, 10, 25, 50],  // opções de paginação
+    language: {
+      search: "Buscar:",
+      lengthMenu: "Mostrar _MENU_ registros",
+      info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      paginate: {
+        first: "Primeiro",
+        last: "Último",
+        next: "Próximo",
+        previous: "Anterior"
+      }
+    }
+  });
+}); </script>
 
 </div>
 
@@ -120,7 +147,7 @@
 
 
 <h2>📈 Margem de Lucro por Produto</h2>
-<table border="1" cellpadding="5">
+<table id="tabelaMargem" border="1" cellpadding="5">
   <thead>
     <tr>
       <th>Produto</th>
@@ -142,5 +169,6 @@
 </table>
 
 </div>
+
 
 <%- include('../partials/footer') %>

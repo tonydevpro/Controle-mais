@@ -1,26 +1,20 @@
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/pdv.css" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
 
-    <%- include('../partials/header', { usuario: usuario }) %>
-    <link rel="stylesheet" href="/css/pdv.css" />
 <h2>PDV - Venda Rápida</h2>
 
 <form id="form-venda">
-  <select id="produto">
-    <option disabled selected>Selecione um produto</option>
-    <% produtos.forEach(p => { %>
-      <option value="<%= p.id %>" data-preco="<%= p.preco_venda %>" data-disponivel="<%= p.quantidade %>">
-        <%= p.nome %> (Estoque: <%= p.quantidade %>)
-      </option>
-    <% }) %>
-  </select>
-
+  <input type="text" id="produto-input" placeholder="Digite o nome do produto" autocomplete="off" />
+  <input type="hidden" id="produto-id" />
   <input type="number" id="quantidade" placeholder="Quantidade" min="1" />
   <input type="number" id="desconto" placeholder="Desconto R$" min="0" step="0.01" />
-  
+
   <button type="button" onclick="adicionarItem()">Adicionar</button>
 
   <table id="tabela-itens">
     <thead>
-      <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Desconto</th><th>ação</th></tr>
+      <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Total com Desconto</th><th>Ação</th></tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -29,84 +23,138 @@
   <button type="submit">Finalizar Venda</button>
 </form>
 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
 <script>
+  const produtos = <%- JSON.stringify(produtos) %>;
   const itens = [];
-
-    excluirItem = (index) => {
-    itens.splice(index, 1);
-    atualizarTabela();
-    atualizarTotal();
-  };
-  function atualizarTabela() {
-  const tbody = document.querySelector('#tabela-itens tbody');
-  tbody.innerHTML = '';
-
-  itens.forEach((item, index) => {
-    const total = item.quantidade * item.preco_unitario;
-    const totalComDesconto = (item.quantidade * item.preco_unitario) - item.desconto;
-    const linha = `
-      <tr>
-        <td>${item.nome}</td>
-        <td>${item.quantidade}</td>
-        <td>R$ ${item.preco_unitario.toFixed(2)}</td>
-        <td>R$ ${total.toFixed(2)}</td>
-        <td>R$ ${totalComDesconto.toFixed(2)}</td
-        <td><button type="button" onclick="excluirItem(${index})">Excluir</button></td>
-      </tr>
-    `;
-    tbody.innerHTML += linha;
+  // Inicializa o autocomplete
+  $("#produto-input").autocomplete({
+    source: produtos.map(p => ({
+      label: `${p.nome} (Estoque: ${p.quantidade})`,
+      value: p.nome,
+      id: p.id,
+      preco: p.preco_venda,
+      disponivel: p.quantidade
+    })),
+    select: function(event, ui) {
+      $("#produto-id").val(ui.item.id);
+      $("#quantidade").attr("max", ui.item.disponivel).val(1);
+      $("#quantidade").data("preco", ui.item.preco);
+      $("#quantidade").data("disponivel", ui.item.disponivel);
+      $("#produto-input").data("produto", ui.item);
+    }
   });
 
-  atualizarTotal();
-}
+  // Garante que o produto seja selecionado mesmo se o usuário só digitar e não clicar na sugestão
+  $("#produto-input").on("change", function() {
+    const nomeDigitado = $(this).val();
+    const produtoSelecionado = produtos.find(p => p.nome === nomeDigitado);
 
+    if (produtoSelecionado) {
+      const item = {
+        id: produtoSelecionado.id,
+        label: `${produtoSelecionado.nome} (Estoque: ${produtoSelecionado.quantidade})`,
+        preco: produtoSelecionado.preco_venda,
+        disponivel: produtoSelecionado.quantidade
+      };
+      $(this).data("produto", item);
+      $("#produto-id").val(item.id);
+      $("#quantidade").attr("max", item.disponivel).val(1);
+    } else {
+      $(this).data("produto", null);
+      $("#produto-id").val('');
+      $("#quantidade").attr("max", null).val('');
+    }
+  });
 
-  function adicionarItem() {
-  const select = document.getElementById('produto');
-  const quantidade = parseInt(document.getElementById('quantidade').value);
-  const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-  const option = select.options[select.selectedIndex];
-  const nome = option.text;
-  const preco = parseFloat(option.dataset.preco);
-  const disponivel = parseInt(option.dataset.disponivel);
-  const produto_id = parseInt(option.value);
+  window.adicionarItem = function() {
+    console.log('função adicionarItem chamada'); // debug
+    const produto = $("#produto-input").data("produto");
+    console.log('Produto selecionado:', produto); // debug
+    const quantidade = parseInt($("#quantidade").val());
+    const desconto = parseFloat($("#desconto").val()) || 0;
 
-  if (!quantidade || quantidade <= 0 || quantidade > disponivel) {
-    return alert('Quantidade inválida.');
+    if (!produto) return alert("Selecione um produto válido da lista.");
+    if (!quantidade || quantidade <= 0 || quantidade > produto.disponivel) return alert("Quantidade inválida.");
+    if (desconto > produto.preco * quantidade) return alert("Desconto maior que o valor total.");
+
+    itens.push({
+      produto_id: produto.id,
+      nome: produto.label,
+      quantidade,
+      preco_unitario: parseFloat(produto.preco),
+      desconto
+    });
+
+    atualizarTabela();
+
+    // Limpa campos após adicionar
+    $("#produto-input").val('').data("produto", null);
+    $("#produto-id").val('');
+    $("#quantidade").val('');
+    $("#desconto").val('');
   }
 
-  if (desconto > preco * quantidade) {
-    return alert('Desconto não pode ser maior que o valor total.');
+  function atualizarTabela() {
+    const tbody = document.querySelector('#tabela-itens tbody');
+    tbody.innerHTML = '';
+
+    itens.forEach((item, index) => {
+      const total = item.quantidade * item.preco_unitario;
+      const totalComDesconto = total - item.desconto;
+      tbody.innerHTML += `
+        <tr>
+          <td>${item.nome}</td>
+          <td>${item.quantidade}</td>
+          <td>R$ ${item.preco_unitario.toFixed(2)}</td>
+          <td>R$ ${total.toFixed(2)}</td>
+          <td>R$ ${totalComDesconto.toFixed(2)}</td>
+          <td><button type="button" onclick="excluirItem(${index})">Excluir</button></td>
+        </tr>
+      `;
+    });
+
+    atualizarTotal();
   }
-
-  itens.push({ produto_id, nome, quantidade, preco_unitario: preco, desconto });
-  atualizarTabela();
-}
-
 
   function atualizarTotal() {
-  const total = itens.reduce((soma, i) => soma + (i.quantidade * i.preco_unitario - i.desconto), 0);
-  document.getElementById('total-venda').innerText = total.toFixed(2);
-}
+    const total = itens.reduce((soma, i) => soma + (i.quantidade * i.preco_unitario - i.desconto), 0);
+    document.getElementById('total-venda').innerText = total.toFixed(2);
+  }
 
+  function excluirItem(index) {
+    itens.splice(index, 1);
+    atualizarTabela();
+  }
 
   document.getElementById('form-venda').addEventListener('submit', async e => {
     e.preventDefault();
-    const res = await fetch('/pdv/finalizar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ itens })
-    });
-    const json = await res.json();
-    if (json.sucesso) {
-      alert('Venda realizada com sucesso!');
-      location.reload();
-    } else {
-      alert('Erro ao finalizar venda.');
+
+    if(itens.length === 0){
+      alert("Adicione pelo menos um item antes de finalizar a venda.");
+      return;
+    }
+
+    try {
+      const res = await fetch('/pdv/finalizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itens })
+      });
+      const json = await res.json();
+      if (json.sucesso) {
+        alert('Venda realizada com sucesso!');
+        location.reload();
+      } else {
+        alert('Erro ao finalizar venda.');
+      }
+    } catch (error) {
+      alert('Erro na comunicação com o servidor.');
+      console.error(error);
     }
   });
 </script>
+
 <%- include('../partials/footer.ejs') %>
-
-    
-

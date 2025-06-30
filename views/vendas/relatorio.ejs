@@ -33,7 +33,7 @@
       <tbody>
         <% totaisSemana.forEach(s => { %>
           <tr>
-            <td><%= s.semana %></td>
+            <td><%= String(s.semana).slice(0, 4) %> - Semana <%= String(s.semana).slice(4) %></td>
             <td>R$ <%= parseFloat(s.total).toFixed(2) %></td>
           </tr>
         <% }) %>

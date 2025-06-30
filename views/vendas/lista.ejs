@@ -1,21 +1,23 @@
 <%- include('../partials/header', { usuario: usuario }) %>
 <link rel="stylesheet" href="/css/vendas.css" />
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
 <h2>Histórico de Vendas</h2>
 
-<table>
+<table id="tabelaVendas" class="display">
   <thead>
     <tr>
       <th>N</th>
       <th>Data</th>
       <th>Total</th>
-    <th>Detalhes</th>
+      <th>Detalhes</th>
       <th>Ações</th>
     </tr>
   </thead>
   <tbody>
     <% if (vendas.length === 0) { %>
-      <tr><td colspan="4">Nenhuma venda registrada.</td></tr>
+      <tr><td colspan="5">Nenhuma venda registrada.</td></tr>
     <% } else { %>
       <% vendas.forEach(v => { %>
         <tr>
@@ -23,16 +25,40 @@
           <td><%= new Date(v.data).toLocaleString() %></td>
           <td>R$ <%= (v.total ? Number(v.total) : 0).toFixed(2) %></td>
           <td><a href="/vendas/<%= v.id %>">Ver Detalhes</a></td>
-            <td>
-                
-          <form action="/vendas/excluir/<%= v.id %>" method="POST" style="display:inline" onsubmit="return confirm('Confirma exclusão da venda #<%= v.id %>?')">
-            <button type="submit" style="background:none; border:none; color:red; cursor:pointer;">Excluir</button>
-          </form>
-            </td>
+          <td>
+            <form action="/vendas/excluir/<%= v.id %>" method="POST" style="display:inline" onsubmit="return confirm('Confirma exclusão da venda #<%= v.id %>?')">
+              <button type="submit" style="background:none; border:none; color:red; cursor:pointer;">Excluir</button>
+            </form>
+          </td>
         </tr>
       <% }) %>
     <% } %>
   </tbody>
 </table>
+
+<!-- jQuery (obrigatório para DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('#tabelaVendas').DataTable({
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_ registros",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        paginate: {
+          first: "Primeiro",
+          last: "Último",
+          next: "Próximo",
+          previous: "Anterior"
+        }
+      },
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50]
+    });
+  });
+</script>
 
 <%- include('../partials/footer') %>

@@ -44,7 +44,7 @@ form#form-venda:hover {
 }
 
 /* Select & Input */
-select, input[type="number"] {
+select, input[type='text'], input[type="number"] {
   font-size: 1.1rem;
   padding: 0.6rem 1rem;
   border-radius: 10px;
