@@ -19,7 +19,16 @@
     <tbody></tbody>
   </table>
 
+
+
   <p><strong>Total:</strong> R$ <span id="total-venda">0.00</span></p>
+    <label for="forma_pagamento">Forma de Pagamento:</label>
+    <select id="forma_pagamento" required>
+      <option value="dinheiro">Dinheiro</option>
+      <option value="pix">Pix</option>
+      <option value="debito">Débito</option>
+      <option value="credito">Crédito</option>
+    </select>
   <button type="submit">Finalizar Venda</button>
 </form>
 
@@ -136,15 +145,16 @@
       alert("Adicione pelo menos um item antes de finalizar a venda.");
       return;
     }
-
+    const forma_pagamento = document.getElementById('forma_pagamento').value;
     try {
       const res = await fetch('/pdv/finalizar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itens })
+        body: JSON.stringify({ itens, forma_pagamento })
       });
       const json = await res.json();
       if (json.sucesso) {
+        window.open(`/vendas/${json.vendaId}/recibo-pdf`, '_blank');
         alert('Venda realizada com sucesso!');
         location.reload();
       } else {

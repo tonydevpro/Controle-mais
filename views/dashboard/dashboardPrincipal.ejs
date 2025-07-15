@@ -1,0 +1,102 @@
+<%- include('../partials/header', { usuario }) %>
+<link rel="stylesheet" href="/css/dashboardPrincipal.css" />
+
+<main class="container">
+  <h1>Dashboard - Controle+</h1>
+
+  <!-- Seção: Resumo Financeiro -->
+  <section class="grid">
+    <div class="card destaque">
+      <h2>Vendas do Dia</h2>
+      <p>R$ <%= vendasDia.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h2>Vendas da Semana</h2>
+      <p>R$ <%= vendasSemana.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h2>Vendas do Mês</h2>
+      <p>R$ <%= vendasMes.toFixed(2) %></p>
+    </div>
+    <div class="card verde">
+      <h2>Lucro Total</h2>
+      <p>R$ <%= lucroTotal.toFixed(2) %></p>
+    </div>
+    <div class="card">
+      <h2>Total de Entradas</h2>
+      <p><%= totalEntrada %> un.</p>
+    </div>
+    <div class="card">
+      <h2>Total de Saídas</h2>
+      <p><%= totalSaida %> un.</p>
+    </div>
+  </section>
+
+  <!-- Seção: Produtos Mais Vendidos -->
+  <section>
+    <h2>📈 Produtos Mais Vendidos</h2>
+    <% if (maisVendidos.length > 0) { %>
+      <ul class="lista">
+        <% maisVendidos.forEach(p => { %>
+          <li><strong><%= p.nome %></strong>: <%= p.total_vendido %> vendidos</li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>Nenhuma venda registrada.</p>
+    <% } %>
+  </section>
+
+  <!-- Seção: Estoque -->
+  <section class="grid">
+    <div class="card azul">
+      <h2>Total de Produtos</h2>
+      <p><%= totalProdutos %></p>
+    </div>
+    <div class="card">
+      <h2>Estoque Total</h2>
+      <p><%= totalEstoque %> un.</p>
+    </div>
+    <div class="card vermelho">
+      <h2>Abaixo do Estoque Mínimo</h2>
+      <p><%= abaixoMinimo %></p>
+    </div>
+    <div class="card laranja">
+      <h2>Caixa do Dia</h2>
+      <p>Dinheiro: R$ <%= caixa.dinheiro?.toFixed(2) || 0 %><br>
+         Pix: R$ <%= caixa.pix?.toFixed(2) || 0 %></p>
+    </div>
+  </section>
+
+  <!-- Seção: Últimas Movimentações -->
+  <section>
+    <h2>📄 Últimas Movimentações</h2>
+    <% if (ultimasMovs.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Produto</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% ultimasMovs.forEach(m => { %>
+            <tr>
+              <td><%= m.data %></td>
+              <td><%= m.produto %></td>
+              <td><%= m.tipo %></td>
+              <td><%= m.quantidade %></td>
+              <td><%= m.observacao || '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>Nenhuma movimentação recente.</p>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

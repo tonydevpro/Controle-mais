@@ -15,21 +15,26 @@ exports.exibirPDV = async (req, res) => {
 };
 
 exports.finalizarVenda = async (req, res) => {
-  const { itens } = req.body; // itens = [{produto_id, quantidade, preco_unitario}]
+  const { itens, forma_pagamento } = req.body;
   const usuarioId = req.session.usuario.id;
+
+  // 🛡️ Validação básica
+  if (!itens || !Array.isArray(itens) || itens.length === 0) {
+    return res.status(400).json({ sucesso: false, mensagem: 'Nenhum item na venda.' });
+  }
 
   try {
     let total = 0;
 
-    // Calcula total da venda
+    // Calcula o total
     for (const item of itens) {
-      total += (item.quantidade * item.preco_unitario) - item.desconto;
+      total += (item.quantidade * item.preco_unitario) - (item.desconto || 0);
     }
 
-    // Insere venda
+    // Insere a venda
     const [resultado] = await conectar.execute(
-      'INSERT INTO vendas (usuario_id, total) VALUES (?, ?)',
-      [usuarioId, total]
+      'INSERT INTO vendas (usuario_id, total, forma_pagamento) VALUES (?, ?, ?)',
+      [usuarioId, total, forma_pagamento]
     );
     const vendaId = resultado.insertId;
 
@@ -37,7 +42,7 @@ exports.finalizarVenda = async (req, res) => {
     for (const item of itens) {
       await conectar.execute(
         'INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, desconto) VALUES (?, ?, ?, ?, ?)',
-        [vendaId, item.produto_id, item.quantidade, item.preco_unitario, item.desconto]
+        [vendaId, item.produto_id, item.quantidade, item.preco_unitario, item.desconto || 0]
       );
 
       await conectar.execute(
@@ -45,22 +50,17 @@ exports.finalizarVenda = async (req, res) => {
         [item.quantidade, item.produto_id, usuarioId]
       );
 
-      // Opcional: registrar como movimentação
       await conectar.execute(
         `INSERT INTO movimentacoes (usuario_id, produto_id, tipo, quantidade, data, observacao) 
          VALUES (?, ?, 'saida', ?, NOW(), 'Venda no PDV')`,
         [usuarioId, item.produto_id, item.quantidade]
       );
     }
-    if (!itens || !Array.isArray(itens) || itens.length === 0) {
-  return res.status(400).json({ sucesso: false, mensagem: 'Nenhum item na venda.' });
-}
 
-
+    // ✅ Retorna o ID da venda para abrir recibo depois
     res.json({ sucesso: true, vendaId });
   } catch (erro) {
     console.error('Erro ao finalizar venda:', erro);
     res.status(500).json({ sucesso: false, mensagem: 'Erro ao finalizar venda.' });
   }
 };
-

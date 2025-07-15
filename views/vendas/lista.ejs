@@ -11,6 +11,7 @@
       <th>N</th>
       <th>Data</th>
       <th>Total</th>
+      <th>Recibo</th>
       <th>Detalhes</th>
       <th>Ações</th>
     </tr>
@@ -24,6 +25,9 @@
           <td><%= v.id %></td>
           <td><%= new Date(v.data).toLocaleString() %></td>
           <td>R$ <%= (v.total ? Number(v.total) : 0).toFixed(2) %></td>
+          <td>
+            <a href="/vendas/<%= v.id %>/recibo-pdf" style="text-decoration: none;" target="_blank">📄Recibo</a>
+          </td>
           <td><a href="/vendas/<%= v.id %>">Ver Detalhes</a></td>
           <td>
             <form action="/vendas/excluir/<%= v.id %>" method="POST" style="display:inline" onsubmit="return confirm('Confirma exclusão da venda #<%= v.id %>?')">

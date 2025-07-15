@@ -294,6 +294,135 @@ const totalEstoque = estoque[0].totalEstoque || 0;
   }
 };
 
+
+exports.exibirDashboardPrincipal = async (req, res) => {
+  try {
+    const usuarioId = req.session.usuario.id;
+
+    // Vendas
+    const [vendasDia] = await conectar.execute(`
+      SELECT SUM(total) AS total FROM vendas 
+      WHERE usuario_id = ? AND DATE(data) = CURDATE()
+    `, [usuarioId]);
+
+    const [vendasSemana] = await conectar.execute(`
+      SELECT SUM(total) AS total FROM vendas 
+      WHERE usuario_id = ? AND YEARWEEK(data, 1) = YEARWEEK(CURDATE(), 1)
+    `, [usuarioId]);
+
+    const [vendasMes] = await conectar.execute(`
+      SELECT SUM(total) AS total FROM vendas 
+      WHERE usuario_id = ? AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())
+    `, [usuarioId]);
+
+    // Lucro total (saídas)
+    const [movsSaida] = await conectar.execute(`
+      SELECT 
+        m.quantidade, 
+        p.preco_custo, 
+        p.preco_venda 
+      FROM movimentacoes m
+      JOIN produtos p ON p.id = m.produto_id
+      WHERE m.usuario_id = ? AND m.tipo = 'saida'
+    `, [usuarioId]);
+
+    let totalBruto = 0;
+    let totalCusto = 0;
+
+    movsSaida.forEach(m => {
+      const qtd = m.quantidade;
+      totalBruto += qtd * Number(m.preco_venda);
+      totalCusto += qtd * Number(m.preco_custo);
+    });
+
+    const lucroTotal = totalBruto - totalCusto;
+
+    // Total entrada e saída (quantitativo)
+    const [totalEntrada] = await conectar.execute(`
+      SELECT SUM(quantidade) AS total FROM movimentacoes 
+      WHERE usuario_id = ? AND tipo = 'entrada'
+    `, [usuarioId]);
+
+    const [totalSaida] = await conectar.execute(`
+      SELECT SUM(quantidade) AS total FROM movimentacoes 
+      WHERE usuario_id = ? AND tipo = 'saida'
+    `, [usuarioId]);
+
+    // Produtos mais vendidos
+    const [maisVendidos] = await conectar.execute(`
+      SELECT p.nome, SUM(iv.quantidade) AS total_vendido
+      FROM itens_venda iv
+      JOIN produtos p ON p.id = iv.produto_id
+      JOIN vendas v ON v.id = iv.venda_id
+      WHERE v.usuario_id = ?
+      GROUP BY p.nome
+      ORDER BY total_vendido DESC
+      LIMIT 5
+    `, [usuarioId]);
+
+    // Resumo do estoque
+    const [estoqueResumo] = await conectar.execute(`
+      SELECT 
+        COUNT(*) AS totalProdutos, 
+        SUM(quantidade) AS totalEstoque 
+      FROM produtos 
+      WHERE usuario_id = ?
+    `, [usuarioId]);
+
+    const [abaixoMinimo] = await conectar.execute(`
+      SELECT COUNT(*) AS abaixo FROM produtos 
+      WHERE usuario_id = ? AND quantidade <= estoque_minimo
+    `, [usuarioId]);
+
+    // Caixa do dia
+    const [caixa] = await conectar.execute(`
+      SELECT
+        SUM(CASE WHEN forma_pagamento = 'dinheiro' THEN total ELSE 0 END) AS dinheiro,
+        SUM(CASE WHEN forma_pagamento = 'pix' THEN total ELSE 0 END) AS pix
+      FROM vendas
+      WHERE usuario_id = ? AND DATE(data) = CURDATE()
+    `, [usuarioId]);
+
+    // Últimas movimentações
+    const [ultimasMovs] = await conectar.execute(`
+      SELECT 
+        DATE_FORMAT(m.data, '%d/%m/%Y %H:%i') AS data,
+        p.nome AS produto,
+        m.tipo,
+        m.quantidade,
+        m.observacao
+      FROM movimentacoes m
+      JOIN produtos p ON m.produto_id = p.id
+      WHERE m.usuario_id = ?
+      ORDER BY m.data DESC
+      LIMIT 5
+    `, [usuarioId]);
+
+    res.render('dashboard/dashboardPrincipal', {
+    vendasDia: Number(vendasDia[0].total) || 0,
+    vendasSemana: Number(vendasSemana[0].total) || 0,
+    vendasMes: Number(vendasMes[0].total) || 0,
+    lucroTotal: Number(lucroTotal) || 0,
+    totalEntrada: Number(totalEntrada[0].total) || 0,
+    totalSaida: Number(totalSaida[0].total) || 0,
+    maisVendidos,
+    totalProdutos: Number(estoqueResumo[0].totalProdutos) || 0,
+    totalEstoque: Number(estoqueResumo[0].totalEstoque) || 0,
+    abaixoMinimo: Number(abaixoMinimo[0].abaixo) || 0,
+    caixa: {
+      dinheiro: Number(caixa[0].dinheiro) || 0,
+      pix: Number(caixa[0].pix) || 0
+    },
+    ultimasMovs
+});
+
+
+  } catch (erro) {
+    console.error('Erro ao carregar dashboard principal:', erro);
+    res.status(500).send('Erro ao carregar o painel principal.');
+  }
+};
+
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');

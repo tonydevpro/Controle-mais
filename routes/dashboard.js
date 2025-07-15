@@ -5,7 +5,11 @@ const verificarAutenticacao = require('../middlewares/autenticacao');
 
 
 // Middleware para verificar autenticação
-router.get('/', verificarAutenticacao, dashboardController.exibirDashboard);
+router.get('/dashboard', verificarAutenticacao, dashboardController.exibirDashboard);
+
+// Rota para exibir o dashboard principal
+router.get('/', verificarAutenticacao, dashboardController.exibirDashboardPrincipal);
+
 
 // Rota para exibir o dashboard
 //router.get('/', dashboardController.exibirDashboard);

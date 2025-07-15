@@ -4,6 +4,7 @@
 <h2>Detalhes da Venda #<%= venda.id %></h2>
 <p><strong>Data:</strong> <%= new Date(venda.data).toLocaleString() %></p>
 <p><strong>Total:</strong> R$ <%= Number(venda.total).toFixed(2) %></p>
+<p><strong>Forma de Pagamento:</strong> <%= venda.forma_pagamento %></p>
 
 <table>
   <thead>
@@ -22,12 +23,13 @@
         <td><%= item.quantidade %></td>
         <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
         <td>R$ <%= Number(item.desconto).toFixed(2) %></td>
-        <td>R$ <%= Number((item.preco_unitario - item.desconto) * item.quantidade).toFixed(2) %></td>
+        <td>R$ <%= Number((item.preco_unitario* item.quantidade) - item.desconto).toFixed(2) %></td>
       </tr>
     <% }) %>
   </tbody>
 </table>
-
+<a href="/vendas/<%= venda.id %>/recibo-pdf" style="text-decoration: none;" target="_blank">📄Recibo</a>
+<br>
 <a href="/vendas">← Voltar</a>
 
 <%- include('../partials/footer') %>

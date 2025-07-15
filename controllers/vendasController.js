@@ -23,7 +23,7 @@ exports.detalharVenda = async (req, res) => {
 
   try {
     const [[venda]] = await conectar.execute(
-      'SELECT id, total, data FROM vendas WHERE id = ? AND usuario_id = ?',
+      'SELECT id, total, data, forma_pagamento FROM vendas WHERE id = ? AND usuario_id = ?',
       [vendaId, usuarioId]
     );
 
@@ -106,6 +106,7 @@ exports.exibirRelatorio = async (req, res) => {
     res.status(500).send('Erro ao carregar relatório.');
   }
 };
+
 
 
 const PDFDocument = require('pdfkit');
@@ -197,6 +198,86 @@ exports.gerarPDF = async (req, res) => {
   } catch (err) {
     console.error('Erro ao gerar PDF completo:', err);
     res.status(500).send('Erro ao gerar o PDF.');
+  }
+};
+
+exports.gerarReciboPDF = async (req, res) => {
+  const usuarioId = req.session.usuario.id;
+  const vendaId = req.params.id;
+
+  try {
+    const [[venda]] = await conectar.execute(
+      'SELECT id, total, data, forma_pagamento FROM vendas WHERE id = ? AND usuario_id = ?',
+      [vendaId, usuarioId]
+    );
+
+    if (!venda) return res.status(404).send('Venda não encontrada');
+
+    const [itens] = await conectar.execute(`
+      SELECT p.nome, iv.quantidade, iv.preco_unitario, iv.desconto
+      FROM itens_venda iv
+      JOIN produtos p ON p.id = iv.produto_id
+      WHERE iv.venda_id = ?
+    `, [vendaId]);
+
+    const total = Number(venda.total) || 0;
+    const dataVenda = venda.data ? new Date(venda.data).toLocaleString() : '-';
+    const formaPagamento = venda.forma_pagamento || '---';
+
+    const doc = new PDFDocument({ margin: 20, size: [300, 600] });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename=recibo-${vendaId}.pdf`);
+    doc.pipe(res);
+
+    // ===== CABEÇALHO =====
+    doc.fontSize(14).text('Controle+', { align: 'center', bold: true });
+    doc.fontSize(10).text('Sistema de Vendas e Estoque', { align: 'center' });
+    doc.moveDown(0.5);
+
+    // ===== INFO DA VENDA =====
+    doc.fontSize(10);
+    doc.text(`Venda nº: ${venda.id}`);
+    doc.text(`Data: ${dataVenda}`);
+    doc.text(`Forma de Pagamento: ${formaPagamento}`);
+    doc.moveDown(0.5);
+
+    // ===== ITENS =====
+    doc.fontSize(11).text('Itens:', { underline: true });
+    doc.moveDown(0.2);
+
+    // Cabeçalho da tabela
+    doc.fontSize(10).text(`Produto       Qtd   R$und   Desc   Subtotal`);
+    doc.moveDown(0.1);
+
+    itens.forEach(item => {
+      const preco = Number(item.preco_unitario) || 0;
+      const desconto = Number(item.desconto) || 0;
+      const quantidade = Number(item.quantidade) || 0;
+      const subtotal = (preco * quantidade) - desconto;
+
+      const linha = `${item.nome.padEnd(12).slice(0,12)}  ${quantidade
+        .toString()
+        .padStart(3)}  ${preco.toFixed(2).padStart(6)}  ${desconto
+        .toFixed(2)
+        .padStart(5)}  ${subtotal.toFixed(2).padStart(7)}`;
+      doc.text(linha);
+    });
+
+    doc.moveDown(0.3);
+
+    // ===== TOTAL =====
+    doc.moveDown(0.2);
+    doc.fontSize(11).text(`TOTAL: R$ ${total.toFixed(2)}`, { align: 'right', bold: true });
+    doc.moveDown(1);
+
+    // ===== RODAPÉ =====
+    doc.fontSize(10).text('Obrigado pela preferência!', { align: 'center', italic: true });
+    doc.fontSize(8).text('https://controle-mais-production.up.railway.app/', { align: 'center', color: '#666' });
+
+    doc.end();
+  } catch (err) {
+    console.error('Erro ao gerar recibo PDF:', err);
+    res.status(500).send('Erro ao gerar recibo.');
   }
 };
 
