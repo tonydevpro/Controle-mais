@@ -39,8 +39,8 @@ exports.logar = async (req, res) => {
     }
 
     setTimeout(() => {
-      res.redirect('/dashboard'); // Altere aqui se for outra página principal
-    }, 1000);
+      res.redirect('/dashboard');
+    }, 7000);
 
   } catch (erro) {
     console.error('Erro ao logar:', erro);
