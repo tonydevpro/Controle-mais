@@ -297,6 +297,11 @@ const totalEstoque = estoque[0].totalEstoque || 0;
 
 exports.exibirDashboardPrincipal = async (req, res) => {
   try {
+    // Verifica se o usuário está logado
+    if (!req.session || !req.session.usuario) {
+      return res.redirect('/login');
+}
+    
     const usuarioId = req.session.usuario.id;
 
     // Vendas
