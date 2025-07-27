@@ -9,35 +9,45 @@ exports.formLogin = (req, res) => {
 
 //processar o login
 exports.logar = async (req, res) => {
-    const { email, senha } = req.body;
+  const { email, senha } = req.body;
 
-    try {
-        const [usuarios] = await conectar.execute('SELECT * FROM usuarios WHERE email = ?', [email]);
+  try {
+    const [usuarios] = await conectar.execute('SELECT * FROM usuarios WHERE email = ?', [email]);
 
-        if (usuarios.length === 0) {
-            return res.render('login', { erro: 'Usuário não encontrado' });
-        }
-        const usuario = usuarios[0];
-        const senhaValida = await bcrypt.compare(senha, usuario.senha);
-        
-        if (!senhaValida) {
-            return res.render('login', { erro: 'Senha incorreta' });
-        }
-
-        req.session.usuario = {
-            id: usuario.id,
-            nome: usuario.nome,
-            email: usuario.email,
-            tipo: usuario.tipo // Adiciona o tipo de usuário à sessão
-        };
-
-        res.redirect('/dashboard');
-
-    } catch (erro) {
-        console.error('Erro ao logar:', erro);
-        res.render('login', { erro: 'Erro ao processar login' });
+    if (usuarios.length === 0) {
+      return res.render('login', { erro: 'Usuário não encontrado' });
     }
+
+    const usuario = usuarios[0];
+    const senhaValida = await bcrypt.compare(senha, usuario.senha);
+
+    if (!senhaValida) {
+      return res.render('login', { erro: 'Senha incorreta' });
+    }
+
+    req.session.usuario = {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      tipo: usuario.tipo
+    };
+
+    // Adiciona verificação de segurança + timeout opcional para evitar erro de redirecionamento
+    if (!req.session.usuario) {
+      console.error('Sessão não definida corretamente');
+      return res.redirect('/login');
+    }
+
+    setTimeout(() => {
+      res.redirect('/dashboard'); // Altere aqui se for outra página principal
+    }, 1000);
+
+  } catch (erro) {
+    console.error('Erro ao logar:', erro);
+    res.status(500).render('erro', { mensagem: 'Erro ao processar login. Tente novamente.' });
+  }
 };
+
 
 // Mostrar formulário de cadastro
 exports.formRegistro = (req, res) => {
