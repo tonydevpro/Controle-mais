@@ -31,6 +31,11 @@
     <input type="number" name="quantidade" step="1" min="1" required value="<%= movimentacao.quantidade %>" />
     <br/>
 
+    <label>Desconto (R$):</label>
+    <input type="number" name="desconto" step="0.01" min="0" value="<%= movimentacao.desconto || 0 %>" />
+    <br/>
+
+
     <label>Observação:</label>
     <textarea name="observacao"><%= movimentacao.observacao %></textarea>
     <br/>

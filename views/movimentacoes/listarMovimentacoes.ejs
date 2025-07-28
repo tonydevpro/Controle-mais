@@ -26,6 +26,7 @@
         
         <th>Preço Custo</th>
         <th>Preço Venda</th>
+        <th>Desconto</th>
         <th>Valor Total</th>
         <th>Ações</th>
       </tr>
@@ -41,9 +42,24 @@
   <td data-label="Observação"><%= m.observacao %></td>
   <td data-label="Preço Custo"><%= Number(m.preco_custo).toFixed(2) %></td>
   <td data-label="Preço Venda"><%= Number(m.preco_venda).toFixed(2) %></td>
-  <td data-label="Valor Total">
-  R$ <%= (m.quantidade * (m.tipo === 'entrada' ? m.preco_custo : m.preco_venda)).toFixed(2) %>
+  <td data-label="Desconto">
+    <% if (m.desconto) { %>
+      R$ <%= Number(m.desconto).toFixed(2) %>
+    <% } else { %>
+      -
+    <% } %>
   </td>
+  <td data-label="Valor Total">
+  <% 
+    let valorUnitario = m.tipo === 'entrada' ? m.preco_custo : m.preco_venda;
+    let valorTotal = valorUnitario * m.quantidade;
+    if (m.tipo === 'saida' && m.desconto) {
+      valorTotal -= Number(m.desconto);
+    }
+  %>
+  R$ <%= valorTotal.toFixed(2) %>
+</td>
+
 
   <td data-label="Ações">
     <a href="/movimentacoes/editarMov/<%= m.id %>">Editar</a> |

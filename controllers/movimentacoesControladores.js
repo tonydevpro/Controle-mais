@@ -12,12 +12,12 @@ exports.adicionarMovimentacoes = async (req, res) => {
 };
 
 exports.registrar = async (req, res) => {
-  const { produto_id, tipo, quantidade, observacao } = req.body;
+  const { produto_id, tipo, quantidade, observacao, desconto } = req.body;
 
   try {
     await conectar.execute(
-      'INSERT INTO movimentacoes (produto_id, tipo, quantidade, observacao, usuario_id) VALUES (?, ?, ?, ?, ?)',
-      [produto_id, tipo, quantidade, observacao, req.session.usuario.id]
+      'INSERT INTO movimentacoes (produto_id, tipo, quantidade, observacao, desconto, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [produto_id, tipo, quantidade, observacao, desconto || 0, req.session.usuario.id]
     );
 
     const operador = tipo === 'entrada' ? '+' : '-';
@@ -83,7 +83,7 @@ exports.formEditarMov = async (req, res) => {
 // Atualizar movimentação
 exports.atualizarMov = async (req, res) => {
   try {
-    const { produto_id, tipo, quantidade, observacao } = req.body;
+    const { produto_id, tipo, quantidade, observacao, desconto } = req.body;
     const [verifica] = await conectar.execute(
   'SELECT * FROM movimentacoes WHERE id = ? AND usuario_id = ?',
   [req.params.id, req.session.usuario.id]
@@ -94,8 +94,8 @@ if (verifica.length === 0) {
 }
 
     await conectar.execute(
-      'UPDATE movimentacoes SET produto_id = ?, tipo = ?, quantidade = ?, observacao = ? WHERE id = ?',
-      [produto_id, tipo, quantidade, observacao, req.params.id]
+      'UPDATE movimentacoes SET produto_id = ?, tipo = ?, quantidade = ?, observacao = ?, desconto = ? WHERE id = ?',
+      [produto_id, tipo, quantidade, observacao, desconto || 0, req.params.id]
     );
 
     // Aqui você pode atualizar o estoque do produto, se necessário

@@ -51,9 +51,9 @@ exports.finalizarVenda = async (req, res) => {
       );
 
       await conectar.execute(
-        `INSERT INTO movimentacoes (usuario_id, produto_id, tipo, quantidade, data, observacao) 
-         VALUES (?, ?, 'saida', ?, NOW(), 'Venda no PDV')`,
-        [usuarioId, item.produto_id, item.quantidade]
+        `INSERT INTO movimentacoes (usuario_id, produto_id, tipo, quantidade, data, observacao, desconto) 
+         VALUES (?, ?, 'saida', ?, NOW(), 'Venda no PDV', ? )`,
+        [usuarioId, item.produto_id, item.quantidade, item.desconto || 0]
       );
     }
 

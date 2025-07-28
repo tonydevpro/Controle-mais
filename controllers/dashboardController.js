@@ -5,109 +5,86 @@ const { Parser } = require('json2csv');
 const PDFDocument = require('pdfkit');
 
 exports.exportarPDF = async (req, res) => {
-  const { data_inicio, data_fim } = req.query;
-  let filtroData = '';
-  let parametros = [];
-
-  if (data_inicio && data_fim) {
-    filtroData = 'WHERE m.usuario_id = ? AND m.data BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)';
-    parametros.push(req.session.usuario.id, data_inicio, data_fim);
-
-  } else {
-    filtroData = 'WHERE m.data >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
-  }
+  const usuario_id = req.session.usuario.id;
+  const { dataInicio, dataFim } = req.query;
 
   try {
-    const [movs] = await conectar.execute(`
-      SELECT 
-        DATE_FORMAT(m.data, '%d/%m/%Y') AS data,
-        p.nome AS produto,
-        m.tipo,
-        m.quantidade,
-        m.observacao
-      FROM movimentacoes m
-      JOIN produtos p ON m.produto_id = p.id
-      ${filtroData}
-      ORDER BY m.data DESC
-    `, parametros);
+    const [movs] = await conectar.execute(
+      `SELECT m.data, p.nome AS produto, m.tipo, m.quantidade, m.desconto, m.observacao 
+       FROM movimentacoes m
+       JOIN produtos p ON m.produto_id = p.id
+       WHERE m.usuario_id = ? AND m.data BETWEEN ? AND ?
+       ORDER BY m.data`,
+      [usuario_id, dataInicio, dataFim]
+    );
 
-    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+    const doc = new PDFDocument();
+    const nomeArquivo = `relatorio_movimentacoes_${Date.now()}.pdf`;
+    res.setHeader('Content-disposition', `attachment; filename=${nomeArquivo}`);
+    res.setHeader('Content-type', 'application/pdf');
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=movimentacoes.pdf');
     doc.pipe(res);
 
-    doc.fontSize(16).text('Relatório de Movimentações - Controle+', { align: 'center' });
+    doc.fontSize(16).text('Relatório de Movimentações', { align: 'center' });
     doc.moveDown();
 
-    doc.fontSize(10).text(`Período: ${data_inicio || 'últimos 7 dias'} até ${data_fim || 'hoje'}`);
-    doc.moveDown(0.5);
-
-    // Cabeçalho da tabela
+    // Cabeçalhos
     doc.font('Helvetica-Bold');
-    doc.text('Data', 30, doc.y, { continued: true, width: 80 });
-    doc.text('Produto', 110, doc.y, { continued: true, width: 150 });
-    doc.text('Tipo', 260, doc.y, { continued: true, width: 60 });
-    doc.text('Qtd', 320, doc.y, { continued: true, width: 50 });
-    doc.text('Obs', 370, doc.y);
+    doc.text('Data', 30, doc.y, { continued: true, width: 70 });
+    doc.text('Produto', 100, doc.y, { continued: true, width: 120 });
+    doc.text('Tipo', 220, doc.y, { continued: true, width: 50 });
+    doc.text('Qtd', 270, doc.y, { continued: true, width: 40 });
+    doc.text('Desc.', 310, doc.y, { continued: true, width: 50 }); // Novo
+    doc.text('Obs', 360, doc.y);
+    doc.moveDown();
     doc.font('Helvetica');
 
-    doc.moveDown(0.3);
-
+    // Conteúdo
     movs.forEach(m => {
-      doc.text(m.data, 30, doc.y, { continued: true, width: 80 });
-      doc.text(m.produto, 110, doc.y, { continued: true, width: 150 });
-      doc.text(m.tipo, 260, doc.y, { continued: true, width: 60 });
-      doc.text(m.quantidade.toString(), 320, doc.y, { continued: true, width: 50 });
-      doc.text(m.observacao || '', 370, doc.y);
+      doc.text(m.data, 30, doc.y, { continued: true, width: 70 });
+      doc.text(m.produto, 100, doc.y, { continued: true, width: 120 });
+      doc.text(m.tipo, 220, doc.y, { continued: true, width: 50 });
+      doc.text(m.quantidade.toString(), 270, doc.y, { continued: true, width: 40 });
+      doc.text(m.desconto?.toFixed(2) || '0.00', 310, doc.y, { continued: true, width: 50 }); // Novo
+      doc.text(m.observacao || '', 360, doc.y);
     });
 
     doc.end();
-  } catch (erro) {
-    console.error('Erro ao exportar PDF:', erro);
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
     res.status(500).send('Erro ao gerar PDF.');
   }
 };
 
 
+
 exports.exportarCSV = async (req, res) => {
-  const { data_inicio, data_fim } = req.query;
-  let filtroData = '';
-  let parametros = [];
-
-  if (data_inicio && data_fim) {
-    filtroData = 'WHERE m.usuario_id = ? AND m.data BETWEEN ? AND DATE_ADD(?, INTERVAL 1 DAY)';
-    parametros.push(req.session.usuario.id, data_inicio, data_fim);
-
-  } else {
-    filtroData = 'WHERE m.data >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
-  }
+  const usuario_id = req.session.usuario.id;
+  const { dataInicio, dataFim } = req.query;
 
   try {
-    const [movs] = await conectar.execute(`
-      SELECT 
-        DATE_FORMAT(m.data, '%Y-%m-%d') AS data,
-        p.nome AS produto,
-        m.tipo,
-        m.quantidade,
-        m.observacao
-      FROM movimentacoes m
-      JOIN produtos p ON m.produto_id = p.id
-      ${filtroData}
-      ORDER BY m.data DESC
-    `, parametros);
+    const [movs] = await conectar.execute(
+      `SELECT m.data, p.nome AS produto, m.tipo, m.quantidade, m.desconto, m.observacao 
+       FROM movimentacoes m
+       JOIN produtos p ON m.produto_id = p.id
+       WHERE m.usuario_id = ? AND m.data BETWEEN ? AND ?
+       ORDER BY m.data`,
+      [usuario_id, dataInicio, dataFim]
+    );
 
-    const parser = new Parser({ fields: ['data', 'produto', 'tipo', 'quantidade', 'observacao'] });
+    const parser = new Parser({ fields: ['data', 'produto', 'tipo', 'quantidade', 'desconto', 'observacao'] });
     const csv = parser.parse(movs);
 
+    const nomeArquivo = `relatorio_movimentacoes_${Date.now()}.csv`;
     res.header('Content-Type', 'text/csv');
-    res.attachment('movimentacoes.csv');
+    res.attachment(nomeArquivo);
     res.send(csv);
-  } catch (erro) {
-    console.error('Erro ao exportar CSV:', erro);
-    res.status(500).send('Erro ao exportar os dados.');
+  } catch (error) {
+    console.error('Erro ao gerar CSV:', error);
+    res.status(500).send('Erro ao gerar CSV.');
   }
 };
+
 
 
 exports.exibirDashboard = async (req, res) => {
@@ -217,7 +194,8 @@ exports.dashboardFinanceiro = async (req, res) => {
         m.quantidade,
         m.tipo,
         p.preco_custo,
-        p.preco_venda
+        p.preco_venda,
+        m.desconto
       FROM movimentacoes m
       JOIN produtos p ON m.produto_id = p.id
       WHERE m.usuario_id = ? ${filtroData}
@@ -232,17 +210,15 @@ exports.dashboardFinanceiro = async (req, res) => {
       const quantidade = m.quantidade;
       const precoVenda = Number(m.preco_venda);
       const precoCusto = Number(m.preco_custo);
+      const desconto = Number(m.desconto) || 0;
 
       if (m.tipo === 'entrada') {
         totalEntrada += quantidade;
       } else if (m.tipo === 'saida') {
         totalSaida += quantidade;
-        totalBruto += quantidade * precoVenda;
+        totalBruto += (quantidade * precoVenda) - desconto;
         totalCusto += quantidade * precoCusto;
       }
-      console.log(quantidade);
-    console.log(precoVenda);
-    console.log(precoCusto);
     });
     
     console.log('Total Bruto:', totalBruto);
@@ -301,7 +277,7 @@ exports.exibirDashboardPrincipal = async (req, res) => {
     if (!req.session || !req.session.usuario) {
       return res.redirect('/login');
 }
-    
+
     const usuarioId = req.session.usuario.id;
 
     // Vendas
@@ -325,7 +301,8 @@ exports.exibirDashboardPrincipal = async (req, res) => {
       SELECT 
         m.quantidade, 
         p.preco_custo, 
-        p.preco_venda 
+        p.preco_venda,
+        m.desconto 
       FROM movimentacoes m
       JOIN produtos p ON p.id = m.produto_id
       WHERE m.usuario_id = ? AND m.tipo = 'saida'
@@ -336,7 +313,8 @@ exports.exibirDashboardPrincipal = async (req, res) => {
 
     movsSaida.forEach(m => {
       const qtd = m.quantidade;
-      totalBruto += qtd * Number(m.preco_venda);
+      const desconto = Number(m.desconto) || 0;
+      totalBruto += ((qtd * Number(m.preco_venda)) - desconto);
       totalCusto += qtd * Number(m.preco_custo);
     });
 
