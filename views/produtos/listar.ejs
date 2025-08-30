@@ -1,44 +1,38 @@
-<head>
-  <meta charset="UTF-8" />
-  <title>Lista de Produtos</title>
-  <link rel="stylesheet" href="/css/global.css" />
-  <link rel="stylesheet" href="/css/lista.css" />
-  <link rel="stylesheet" href="/css/header.css" />
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/global.css" />
+<link rel="stylesheet" href="/css/lista.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
 
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-</head>
-<body>
-  <%- include('../partials/header', { usuario: usuario }) %>
+<main class="pagina-lista">
+  <h1>Produtos</h1>
 
-  <div class="pagina-lista">
-    <h1>Produtos</h1>
+  <div class="acoes">
+    <a href="/produtos/adicionar" class="btn">Adicionar Produto</a>
+    <a href="/movimentacoes" class="btn">Histórico de Movimentações</a>
+  </div>
 
-    <a href="/produtos/adicionar">Adicionar Produto</a>
-    <a href="/movimentacoes">Histórico de Movimentações</a>
+  <form action="/produtos/importar" method="POST" enctype="multipart/form-data" class="importar-form">
+    <input type="file" name="arquivo" accept=".csv" required />
+    <button type="submit">Importar Produtos</button>
+  </form>
 
-    <br><br>
+  <div class="exemploImportar">
+    <p>Exemplo de arquivo CSV para importação:</p>
+    <a href="/css/img/modelo_produtos.csv">Modelo para Importação</a>
+    <p>O arquivo deve conter as colunas: <strong>nome, preco_custo, preco_venda, quantidade</strong>.</p>
+  </div>
 
-    <form action="/produtos/importar" method="POST" enctype="multipart/form-data">
-      <input type="file" name="arquivo" accept=".csv" required />
-      <button type="submit">Importar Produtos</button>
-    </form>
-
-    <div class="exemploImportar">
-      <p>Exemplo de arquivo CSV para importação:</p>
-      <a href="/css/img/modelo_produtos.csv">Modelo para Importação</a>
-      <p>O arquivo deve conter as colunas: nome, preco_custo, preco_venda e quantidade.</p>
-    </div>
-
-    <br/><br/>
-    <h2>Lista de Produtos</h2>
+  <section class="resumo-estoque">
+    <h2>Resumo do Estoque</h2>
     <p>Total de produtos: <strong><%= produtos.length %></strong></p>
-    <p>Produtos com estoque baixo: <strong><%= produtos.filter(p => p.quantidade <= 5).length %></strong></p>
+    <p>Produtos com estoque baixo (≤5): <strong><%= produtos.filter(p => p.quantidade <= 5).length %></strong></p>
     <p>Produtos com estoque zerado: <strong><%= produtos.filter(p => p.quantidade === 0).length %></strong></p>
     <p>Produtos com estoque acima de 5: <strong><%= produtos.filter(p => p.quantidade > 5).length %></strong></p>
     <p>Produtos com estoque acima de 10: <strong><%= produtos.filter(p => p.quantidade > 10).length %></strong></p>
+  </section>
 
-    <!-- TABELA DE PRODUTOS -->
+  <section class="tabela-produtos">
+    <h2>Lista de Produtos</h2>
     <table id="tabelaProdutos" border="1" cellpadding="5" cellspacing="0">
       <thead>
         <tr>
@@ -52,7 +46,7 @@
         <% produtos.forEach(produto => { %>
           <tr>
             <td><%= produto.nome %></td>
-            <td><%= Number(produto.preco_venda).toFixed(2) %></td>
+            <td>R$ <%= Number(produto.preco_venda).toFixed(2) %></td>
             <td><%= produto.quantidade %></td>
             <td>
               <a href="/produtos/editar/<%= produto.id %>">Editar</a> |
@@ -64,30 +58,29 @@
         <% }) %>
       </tbody>
     </table>
-  </div>
+  </section>
+</main>
 
-  <%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer.ejs') %>
 
-  <!-- jQuery e DataTables JS -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      $('#tabelaProdutos').DataTable({
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50],
-        language: {
-          search: "Buscar:",
-          lengthMenu: "Mostrar _MENU_ registros",
-          info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-          paginate: {
-            first: "Primeiro",
-            last: "Último",
-            next: "Próximo",
-            previous: "Anterior"
-          }
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#tabelaProdutos').DataTable({
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      language: {
+        search: "Buscar:",
+        lengthMenu: "Mostrar _MENU_ registros",
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        paginate: {
+          first: "Primeiro",
+          last: "Último",
+          next: "Próximo",
+          previous: "Anterior"
         }
-      });
+      }
     });
-  </script>
-</body>
+  });
+</script>

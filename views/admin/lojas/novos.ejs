@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Nova Loja</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #215a6d;
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    legend {
+      font-weight: bold;
+    }
+    input, textarea {
+      display: block;
+      width: 300px;
+      padding: 6px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    textarea {
+      resize: vertical;
+      height: 60px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #215a6d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3ca2a2;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Criar Nova Loja</h1>
+
+  <form method="POST" action="/admin/lojas/nova">
+
+    <fieldset>
+      <legend>Dados da Loja</legend>
+      <input type="text" name="nome_fantasia" placeholder="Nome Fantasia" required>
+      <input type="text" name="cnpj" placeholder="CNPJ">
+      <input type="email" name="email" placeholder="Email da Loja">
+      <input type="text" name="telefone" placeholder="Telefone">
+      <textarea name="endereco" placeholder="Endereço"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Dados do Dono</legend>
+      <input type="text" name="nome_dono" placeholder="Nome do Dono" required>
+      <input type="email" name="email_dono" placeholder="Email do Dono" required>
+      <input type="password" name="senha_dono" placeholder="Senha" required>
+    </fieldset>
+
+    <button type="submit">Criar Loja</button>
+
+  </form>
+
+</body>
+</html>

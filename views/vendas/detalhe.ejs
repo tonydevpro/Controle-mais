@@ -1,35 +1,44 @@
 <%- include('../partials/header', { usuario: usuario }) %>
 <link rel="stylesheet" href="/css/vendas.css" />
 
-<h2>Detalhes da Venda #<%= venda.id %></h2>
-<p><strong>Data:</strong> <%= new Date(venda.data).toLocaleString() %></p>
-<p><strong>Total:</strong> R$ <%= Number(venda.total).toFixed(2) %></p>
-<p><strong>Forma de Pagamento:</strong> <%= venda.forma_pagamento %></p>
+<main class="pagina-detalhes">
+  <h2>Detalhes da Venda #<%= venda.id %></h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>Produto</th>
-      <th>Quantidade</th>
-      <th>Preço Unitário</th>
-      <th>Desconto</th>
-      <th>Subtotal</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% itens.forEach(item => { %>
-      <tr>
-        <td><%= item.nome %></td>
-        <td><%= item.quantidade %></td>
-        <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
-        <td>R$ <%= Number(item.desconto).toFixed(2) %></td>
-        <td>R$ <%= Number((item.preco_unitario* item.quantidade) - item.desconto).toFixed(2) %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
-<a href="/vendas/<%= venda.id %>/recibo-pdf" style="text-decoration: none;" target="_blank">📄Recibo</a>
-<br>
-<a href="/vendas">← Voltar</a>
+  <section class="info-venda">
+    <p><strong>Data:</strong> <%= new Date(venda.data).toLocaleString() %></p>
+    <p><strong>Total:</strong> R$ <%= Number(venda.total).toFixed(2) %></p>
+    <p><strong>Forma de Pagamento:</strong> <%= venda.forma_pagamento %></p>
+  </section>
+
+  <section class="itens-venda">
+    <table>
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Preço Unitário</th>
+          <th>Desconto</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% itens.forEach(item => { %>
+          <tr>
+            <td><%= item.nome %></td>
+            <td><%= item.quantidade %></td>
+            <td>R$ <%= Number(item.preco_unitario).toFixed(2) %></td>
+            <td>R$ <%= Number(item.desconto).toFixed(2) %></td>
+            <td>R$ <%= Number((item.preco_unitario * item.quantidade) - item.desconto).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="acoes-venda">
+    <a href="/vendas/<%= venda.id %>/recibo-pdf" target="_blank">📄 Recibo</a>
+    <a href="/vendas">← Voltar</a>
+  </div>
+</main>
 
 <%- include('../partials/footer') %>

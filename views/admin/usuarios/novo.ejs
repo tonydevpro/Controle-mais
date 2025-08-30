@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Novo Funcionário</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #215a6d;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, select {
+      width: 300px;
+      padding: 6px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #215a6d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3ca2a2;
+    }
+    .erro {
+      color: red;
+      margin-bottom: 15px;
+    }
+    a.voltar {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #215a6d;
+    }
+    a.voltar:hover {
+      color: #3ca2a2;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Novo Funcionário</h1>
+
+  <% if (typeof erro !== 'undefined') { %>
+    <p class="erro"><%= erro %></p>
+  <% } %>
+
+  <form action="/admin/usuarios/novo" method="POST">
+    <label>Nome:</label><br>
+    <input type="text" name="nome" required><br>
+
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br>
+
+    <label>Senha:</label><br>
+    <input type="password" name="senha" required><br>
+
+    <label>Cargo:</label><br>
+    <select name="cargo_id" required>
+      <% cargos.forEach(cargo => { %>
+        <option value="<%= cargo.id %>"><%= cargo.nome %></option>
+      <% }) %>
+    </select><br>
+
+    <button type="submit">Criar</button>
+  </form>
+
+  <a href="/admin/usuarios" class="voltar">Voltar à lista</a>
+
+</body>
+</html>

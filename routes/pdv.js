@@ -1,9 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const pdvController = require('../controllers/pdvController');
-const  autenticarUsuario  = require('../middlewares/autenticacao');
+const { verificarAutenticacao, verificarPermissao } = require('../middlewares');
 
-router.get('/', autenticarUsuario, pdvController.exibirPDV);
-router.post('/finalizar', autenticarUsuario, pdvController.finalizarVenda);
+// Exibir PDV
+router.get(
+  '/',
+  verificarAutenticacao,
+  verificarPermissao('pdv_acessar'),
+  pdvController.exibirPDV
+);
+
+// Finalizar venda
+router.post(
+  '/finalizar',
+  verificarAutenticacao,
+  verificarPermissao('pdv_finalizar'),
+  pdvController.finalizarVenda
+);
 
 module.exports = router;

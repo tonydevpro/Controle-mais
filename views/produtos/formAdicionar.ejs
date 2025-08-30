@@ -1,32 +1,39 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>Adicionar Produto</title>
-  <link rel="stylesheet" href="/css/formEditar.css" />
-</head>
-<body>
+<%- include('../partials/header', { usuario: usuario }) %>
+<link rel="stylesheet" href="/css/formEditar.css" />
+
+<main class="form-container">
   <h1>Adicionar Produto</h1>
+
   <form action="/produtos/salvar" method="POST">
-    <label>Nome:</label>
-    <input type="text" name="nome" required /><br/>
+    <div class="form-group">
+      <label>Nome:</label>
+      <input type="text" name="nome" required />
+    </div>
 
-    <label>Descrição:</label>
-    <textarea name="descricao"></textarea><br/>
+    <div class="form-group">
+      <label>Descrição:</label>
+      <textarea name="descricao"></textarea>
+    </div>
 
-    <label>Preço de custo:</label>
-    <input type="number" step="0.01" name="preco_custo" /><br/>
+    <div class="form-group">
+      <label>Preço de custo:</label>
+      <input type="number" step="0.01" name="preco_custo" />
+    </div>
 
-    <label>Preço de venda:</label>
-    <input type="number" step="0.01" name="preco_venda" required /><br/>
+    <div class="form-group">
+      <label>Preço de venda:</label>
+      <input type="number" step="0.01" name="preco_venda" required />
+    </div>
 
-    <label>Quantidade:</label>
-    <input type="number" name="quantidade" /><br/>
+    <div class="form-group">
+      <label>Quantidade:</label>
+      <input type="number" name="quantidade" min="0" />
+    </div>
 
     <button type="submit">Salvar</button>
   </form>
-  <a href="/produtos">Voltar</a>
 
-  <%- include('../partials/footer.ejs') %>
-</body>
-</html>
+  <a href="/produtos">Voltar</a>
+</main>
+
+<%- include('../partials/footer.ejs') %>

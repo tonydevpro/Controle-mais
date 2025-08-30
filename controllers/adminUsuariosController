@@ -1,0 +1,166 @@
+const conectar = require('../banco/conexao');
+const bcrypt = require('bcryptjs');
+
+// Listar usuários da loja
+exports.listarUsuarios = async (req, res) => {
+  if (!req.session || !req.session.usuario) return res.redirect('/login');
+  const loja_id = req.session.usuario.loja_id;
+
+  try {
+    const [usuarios] = await conectar.execute(
+      `SELECT u.id, u.nome, u.email, c.nome AS cargo, u.eh_dono
+       FROM usuarios u
+       LEFT JOIN cargos c ON u.cargo_id = c.id
+       WHERE u.loja_id = ?`,
+      [loja_id]
+    );
+    res.render('admin/usuarios/index', { usuarios, usuarioLogado: req.session.usuario });
+  } catch (erro) {
+    console.error('Erro ao listar usuários:', erro);
+    res.status(500).send('Erro ao listar usuários');
+  }
+};
+
+// Formulário novo usuário
+exports.formNovoUsuario = async (req, res) => {
+  try {
+    const cargos = await carregarCargos();
+    res.render('admin/usuarios/novo', { cargos, usuarioLogado: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar cargos:', err);
+    res.status(500).send('Erro ao carregar formulário');
+  }
+};
+
+// Criar novo usuário
+exports.criarUsuario = async (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const { nome, email, senha, cargo_id, eh_dono } = req.body;
+
+  try {
+    const [existe] = await conectar.execute(
+      'SELECT id FROM usuarios WHERE email = ? AND loja_id = ?',
+      [email, loja_id]
+    );
+
+    if (existe.length > 0) {
+      return res.render('admin/usuarios/novo', {
+        erro: 'Email já cadastrado',
+        cargos: await carregarCargos(),
+        usuarioLogado: req.session.usuario
+      });
+    }
+
+    const hash = await bcrypt.hash(senha, 10);
+
+    // Só permite marcar dono se quem estiver criando for dono
+    const ehDonoFinal = req.session.usuario.eh_dono === 1 ? (eh_dono ? 1 : 0) : 0;
+
+    await conectar.execute(
+      'INSERT INTO usuarios (nome, email, senha, cargo_id, loja_id, eh_dono) VALUES (?, ?, ?, ?, ?, ?)',
+      [nome, email, hash, cargo_id, loja_id, ehDonoFinal]
+    );
+
+    res.redirect('/admin/usuarios');
+  } catch (err) {
+    console.error('Erro ao criar usuário:', err);
+    res.status(500).send('Erro ao criar usuário');
+  }
+};
+
+async function carregarCargos() {
+  const [cargos] = await conectar.execute('SELECT * FROM cargos ORDER BY nome');
+  return cargos;
+}
+
+// Formulário de edição
+exports.formEditarUsuario = async (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const usuarioId = req.params.id;
+
+  try {
+    const [[usuario]] = await conectar.execute(
+      'SELECT * FROM usuarios WHERE id = ? AND loja_id = ?',
+      [usuarioId, loja_id]
+    );
+
+    if (!usuario) return res.status(404).send('Usuário não encontrado');
+
+    const cargos = await carregarCargos();
+    res.render('admin/usuarios/editar', { usuario, cargos, usuarioLogado: req.session.usuario });
+  } catch (err) {
+    console.error('Erro ao carregar usuário:', err);
+    res.status(500).send('Erro ao carregar usuário');
+  }
+};
+
+// Atualizar usuário
+exports.atualizarUsuario = async (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const usuarioId = req.params.id;
+  const { nome, email, senha, cargo_id, eh_dono } = req.body;
+
+  try {
+    const [existe] = await conectar.execute(
+      'SELECT id FROM usuarios WHERE email = ? AND loja_id = ? AND id != ?',
+      [email, loja_id, usuarioId]
+    );
+
+    if (existe.length > 0) {
+      const cargos = await carregarCargos();
+      return res.render('admin/usuarios/editar', {
+        usuario: { id: usuarioId, nome, email, cargo_id },
+        cargos,
+        erro: 'Email já está em uso',
+        usuarioLogado: req.session.usuario
+      });
+    }
+
+    let sql = 'UPDATE usuarios SET nome = ?, email = ?, cargo_id = ?';
+    let params = [nome, email, cargo_id];
+
+    if (senha && senha.trim().length > 0) {
+      const hash = await bcrypt.hash(senha, 10);
+      sql += ', senha = ?';
+      params.push(hash);
+    }
+
+    // Atualiza dono apenas se quem estiver alterando for dono
+    if (req.session.usuario.eh_dono === 1 && eh_dono !== undefined) {
+      sql += ', eh_dono = ?';
+      params.push(eh_dono ? 1 : 0);
+    }
+
+    sql += ' WHERE id = ? AND loja_id = ?';
+    params.push(usuarioId, loja_id);
+
+    await conectar.execute(sql, params);
+    res.redirect('/admin/usuarios');
+  } catch (err) {
+    console.error('Erro ao atualizar usuário:', err);
+    res.status(500).send('Erro ao atualizar usuário');
+  }
+};
+
+// Remover usuário
+exports.removerUsuario = async (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const usuarioId = req.params.id;
+
+  try {
+    const [[usuario]] = await conectar.execute(
+      'SELECT eh_dono FROM usuarios WHERE id = ? AND loja_id = ?',
+      [usuarioId, loja_id]
+    );
+
+    if (!usuario) return res.status(404).send('Usuário não encontrado');
+
+    if (usuario.eh_dono === 1) return res.status(403).send('Não é permitido excluir o dono da loja');
+
+    await conectar.execute('DELETE FROM usuarios WHERE id = ? AND loja_id = ?', [usuarioId, loja_id]);
+    res.redirect('/admin/usuarios');
+  } catch (err) {
+    console.error('Erro ao remover usuário:', err);
+    res.status(500).send('Erro ao remover usuário');
+  }
+};

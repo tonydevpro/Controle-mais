@@ -1,45 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Controle+</title>
-  <link rel="stylesheet" href="/css/global.css">
-  <link rel="stylesheet" href="/css/home.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-    }
-    nav {
-      background-color: #215a6d;
-      padding: 1em;
-      display: flex;
-      gap: 1em;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    .container {
-      padding: 2em;
-    }
-  </style>
-</head>
-<body>
-  <%- include('partials/header.ejs', { usuario: usuario }) %>
+<div class="container">
+  <h1>Bem-vindo ao Controle+</h1>
+  <p>Escolha uma das opções abaixo para começar:</p>
 
-
-
-  <div class="container">
-    <h1>Bem-vindo ao Controle+</h1>
-    <p>Escolha uma das opções no menu acima para começar.</p>
+  <div class="menu-cards">
+    <a href="/produtos" class="card">Produtos</a>
+    <a href="/movimentacoes" class="card">Movimentações</a>
+    <a href="/vendas" class="card">Vendas</a>
+    <a href="/pdv" class="card">PDV</a>
+    <a href="/dashboard" class="card">Dashboard</a>
   </div>
+</div>
 
-  <%- include('partials/footer.ejs') %>
-
-</body>
-</html>
+<style>
+  .menu-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-top: 2em;
+  }
+  .card {
+    background-color: #3ca2a2;
+    color: white;
+    padding: 1.5em 2em;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    flex: 1 1 150px;
+    text-align: center;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .card:hover {
+    background-color: #215a6d;
+    transform: translateY(-5px);
+  }
+</style>

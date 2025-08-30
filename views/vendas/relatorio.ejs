@@ -16,8 +16,8 @@
       <tbody>
         <% totaisDia.forEach(d => { %>
           <tr>
-            <td><%= d.dia.toISOString().slice(0,10) %></td>
-            <td>R$ <%= parseFloat(d.total).toFixed(2) %></td>
+            <td><%= d.dia.toLocaleDateString('pt-BR') %></td>
+            <td class="valor-total">R$ <%= parseFloat(d.total).toFixed(2) %></td>
           </tr>
         <% }) %>
       </tbody>
@@ -34,7 +34,7 @@
         <% totaisSemana.forEach(s => { %>
           <tr>
             <td><%= String(s.semana).slice(0, 4) %> - Semana <%= String(s.semana).slice(4) %></td>
-            <td>R$ <%= parseFloat(s.total).toFixed(2) %></td>
+            <td class="valor-total">R$ <%= parseFloat(s.total).toFixed(2) %></td>
           </tr>
         <% }) %>
       </tbody>
@@ -51,7 +51,7 @@
         <% totaisMes.forEach(m => { %>
           <tr>
             <td><%= m.mes %></td>
-            <td>R$ <%= parseFloat(m.total).toFixed(2) %></td>
+            <td class="valor-total">R$ <%= parseFloat(m.total).toFixed(2) %></td>
           </tr>
         <% }) %>
       </tbody>
@@ -68,7 +68,7 @@
         <% totaisAno.forEach(a => { %>
           <tr>
             <td><%= a.ano %></td>
-            <td>R$ <%= parseFloat(a.total).toFixed(2) %></td>
+            <td class="valor-total">R$ <%= parseFloat(a.total).toFixed(2) %></td>
           </tr>
         <% }) %>
       </tbody>

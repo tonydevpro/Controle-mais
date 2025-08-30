@@ -6,22 +6,57 @@
   <link rel="stylesheet" href="/css/filtrarMovimentacoes.css" />
 </head>
 <body>
+  <%- include('../partials/header', { usuario: usuario }) %>
 
-    <%- include('../partials/header', { usuario: usuario }) %>
+  <main class="pagina-filtrar">
+    <h1>Relatório de Movimentações</h1>
 
-  <div class="pagina-filtrar">
-  <h1>Relatório de Movimentações</h1>
-  <form action="/movimentacoes/relatorio" method="POST">
-    <label>Data Inicial:</label>
-    <input type="date" name="dataInicio" required><br>
+    <form action="/movimentacoes/relatorio" method="POST" class="form-filtrar">
+      <div class="form-group">
+        <label for="dataInicio">Data Inicial:</label>
+        <input type="date" id="dataInicio" name="dataInicio" value="<%= dataInicio || '' %>" required>
+      </div>
 
-    <label>Data Final:</label>
-    <input type="date" name="dataFim" required><br>
+      <div class="form-group">
+        <label for="dataFim">Data Final:</label>
+        <input type="date" id="dataFim" name="dataFim" value="<%= dataFim || '' %>" required>
+      </div>
 
-    <button type="submit">Buscar</button>
-  </form>
-  <a href="/produtos">Voltar</a>
-</div>
+      <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <% if (typeof movimentacoes !== 'undefined') { %>
+      <% if (movimentacoes.length > 0) { %>
+        <table border="1" cellpadding="8" cellspacing="0" class="tabela-relatorio">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Produto</th>
+              <th>Tipo</th>
+              <th>Quantidade</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% movimentacoes.forEach(m => { %>
+              <tr>
+                <td><%= new Date(m.data).toLocaleDateString() %></td>
+                <td><%= m.produto %></td>
+                <td><%= m.tipo %></td>
+                <td><%= m.quantidade %></td>
+                <td><%= m.observacao || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p class="alerta">⚠️ Nenhuma movimentação encontrada para o período selecionado.</p>
+      <% } %>
+    <% } %>
+
+    <p><a href="/produtos" class="btn-link">Voltar</a></p>
+  </main>
+
   <%- include('../partials/footer.ejs') %>
 </body>
 </html>

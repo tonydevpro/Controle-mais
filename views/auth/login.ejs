@@ -34,6 +34,7 @@
 
     label {
       margin-top: 10px;
+      font-weight: bold;
     }
 
     input {
@@ -41,6 +42,7 @@
       border-radius: 5px;
       border: 1px solid #ccc;
       margin-top: 5px;
+      font-size: 14px;
     }
 
     button {
@@ -51,15 +53,29 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #3ca2a2;
+    }
+
+    .erro, .sucesso {
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
     }
 
     .erro {
       background: #ffe5e5;
       color: #c00;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 5px;
-      text-align: center;
+    }
+
+    .sucesso {
+      background: #e6ffe6;
+      color: #080;
     }
 
     .link-registro {
@@ -70,16 +86,24 @@
     .link-registro a {
       color: #215a6d;
       text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link-registro a:hover {
+      color: #3ca2a2;
     }
   </style>
 </head>
 <body>
-   
   <div class="login-container">
     <h2>Entrar no Controle+</h2>
 
+    <% if (sucesso && sucesso.length > 0) { %>
+      <div class="sucesso"><%= sucesso[0] %></div>
+    <% } %>
+
     <% if (erro) { %>
-      <div class="erro"><%= erro %></div>
+      <div class="erro"><%= Array.isArray(erro) ? erro[0] : erro %></div>
     <% } %>
 
     <form method="POST" action="/login">

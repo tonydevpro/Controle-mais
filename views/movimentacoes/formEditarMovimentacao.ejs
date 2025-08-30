@@ -6,44 +6,48 @@
   <link rel="stylesheet" href="/css/formEditar.css">
 </head>
 <body>
-  <h1>Editar Movimentação</h1>
-  
-  <form action="/movimentacoes/editarMov/<%= movimentacao.id %>" method="POST">
-    
-    <label>Produto:</label>
-    <select name="produto_id" required>
-      <% produtos.forEach(produto => { %>
-        <option value="<%= produto.id %>" <%= produto.id === movimentacao.produto_id ? 'selected' : '' %> >
-          <%= produto.nome %>
-        </option>
-      <% }); %>
-    </select>
-    <br/>
+  <main class="container-editar">
+    <h1>Editar Movimentação</h1>
 
-    <label>Tipo:</label>
-    <select name="tipo" required>
-      <option value="entrada" <%= movimentacao.tipo === 'entrada' ? 'selected' : '' %> >Entrada</option>
-      <option value="saida" <%= movimentacao.tipo === 'saida' ? 'selected' : '' %> >Saída</option>
-    </select>
-    <br/>
+    <form action="/movimentacoes/editarMov/<%= movimentacao.id %>" method="POST" class="form-editar">
+      <div class="form-group">
+        <label for="produto">Produto:</label>
+        <select name="produto_id" id="produto" required>
+          <% produtos.forEach(produto => { %>
+            <option value="<%= produto.id %>" <%= produto.id === movimentacao.produto_id ? 'selected' : '' %> >
+              <%= produto.nome %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
 
-    <label>Quantidade:</label>
-    <input type="number" name="quantidade" step="1" min="1" required value="<%= movimentacao.quantidade %>" />
-    <br/>
+      <div class="form-group">
+        <label for="tipo">Tipo:</label>
+        <select name="tipo" id="tipo" required>
+          <option value="entrada" <%= movimentacao.tipo === 'entrada' ? 'selected' : '' %>>Entrada</option>
+          <option value="saida" <%= movimentacao.tipo === 'saida' ? 'selected' : '' %>>Saída</option>
+        </select>
+      </div>
 
-    <label>Desconto (R$):</label>
-    <input type="number" name="desconto" step="0.01" min="0" value="<%= movimentacao.desconto || 0 %>" />
-    <br/>
+      <div class="form-group">
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" name="quantidade" id="quantidade" step="1" min="1" required value="<%= movimentacao.quantidade %>" />
+      </div>
 
+      <div class="form-group">
+        <label for="desconto">Desconto (R$):</label>
+        <input type="number" name="desconto" id="desconto" step="0.01" min="0" value="<%= movimentacao.desconto || 0 %>" />
+      </div>
 
-    <label>Observação:</label>
-    <textarea name="observacao"><%= movimentacao.observacao %></textarea>
-    <br/>
+      <div class="form-group">
+        <label for="observacao">Observação:</label>
+        <textarea name="observacao" id="observacao"><%= movimentacao.observacao %></textarea>
+      </div>
 
-    <button type="submit">Atualizar</button>
-  </form>
-
-  <a href="/movimentacoes">Voltar</a>
+      <button type="submit" class="btn">Atualizar</button>
+      <a href="/movimentacoes" class="btn-link">Voltar</a>
+    </form>
+  </main>
 
   <%- include('../partials/footer.ejs') %>
 </body>

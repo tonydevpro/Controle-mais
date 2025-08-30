@@ -1,15 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Controle+</title>
 
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+  <link rel="stylesheet" href="/css/dashboard.css">
+
+  <style>
+    /* Responsividade dos KPIs */
+    .kpi-cards {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .kpi-card {
+      flex: 1 1 150px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .kpi-card .icon {
+      font-size: 30px;
+    }
+    @media(max-width: 768px) {
+      .kpi-cards {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
 <body>
 <%- include('../partials/header', { usuario: usuario }) %>
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-<!-- jQuery (necessário para DataTables) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-<link rel="stylesheet" href="/css/dashboard.css">
-
 
 <h1>📊 Dashboard - Controle+</h1>
 
@@ -22,7 +52,9 @@
       <select name="produto_id">
         <option value="">Todos</option>
         <% produtos.forEach(p => { %>
-          <option value="<%= p.id %>" <%= produto_id == p.id ? 'selected' : '' %>><%= p.nome %></option>
+          <% if(p.loja_id === usuario.loja_id) { %>
+            <option value="<%= p.id %>" <%= produto_id == p.id ? 'selected' : '' %>><%= p.nome %></option>
+          <% } %>
         <% }) %>
       </select>
     </label>
@@ -69,8 +101,6 @@
     <p>R$ <%= lucroTotal %></p>
   </div>
 </section>
-
-
 
 <section>
   <h2>Resumo</h2>
@@ -126,14 +156,14 @@
   const dados = <%- JSON.stringify(movimentacoes) %>;
 
   const datas = [...new Set(dados.map(m => m.data))];
-  const entradas = datas.map(d => {
-    const mov = dados.find(m => m.data === d && m.tipo === 'entrada');
-    return mov ? mov.total : 0;
-  });
-  const saidas = datas.map(d => {
-    const mov = dados.find(m => m.data === d && m.tipo === 'saida');
-    return mov ? mov.total : 0;
-  });
+  const entradas = datas.map(d =>
+    dados.filter(m => m.data === d && m.tipo === 'entrada')
+         .reduce((sum, m) => sum + m.total, 0)
+  );
+  const saidas = datas.map(d =>
+    dados.filter(m => m.data === d && m.tipo === 'saida')
+         .reduce((sum, m) => sum + m.total, 0)
+  );
 
   const ctx = document.getElementById('graficoMovimentacoes').getContext('2d');
   new Chart(ctx, {
@@ -141,52 +171,34 @@
     data: {
       labels: datas,
       datasets: [
-        {
-          label: 'Entradas',
-          data: entradas,
-          borderColor: 'green',
-          fill: false
-        },
-        {
-          label: 'Saídas',
-          data: saidas,
-          borderColor: 'red',
-          fill: false
-        }
+        { label: 'Entradas', data: entradas, borderColor: 'green', fill: false },
+        { label: 'Saídas', data: saidas, borderColor: 'red', fill: false }
       ]
     },
     options: {
       responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
+      scales: { y: { beginAtZero: true } }
     }
   });
 </script>
+
 <script>
   $(document).ready(function() {
     $('#tabelaMovimentacoes').DataTable({
       pageLength: 10,
       lengthMenu: [5, 10, 25, 50],
-      order: [[0, 'desc']], // ordena pela coluna de data decrescente
+      order: [[0, 'desc']],
+      scrollX: true,
       language: {
         search: "Buscar:",
         lengthMenu: "Mostrar _MENU_ registros",
         info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-        paginate: {
-          first: "Primeiro",
-          last: "Último",
-          next: "Próximo",
-          previous: "Anterior"
-        }
+        paginate: { first: "Primeiro", last: "Último", next: "Próximo", previous: "Anterior" }
       }
     });
   });
 </script>
 
 <%- include('../partials/footer.ejs') %>
-
-
-
 </body>
 </html>

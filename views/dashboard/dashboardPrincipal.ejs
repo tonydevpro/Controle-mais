@@ -4,7 +4,7 @@
 <main class="container">
   <h1>Dashboard - Controle+</h1>
 
-  <!-- Seção: Resumo Financeiro -->
+  <!-- Resumo Financeiro -->
   <section class="grid">
     <div class="card destaque">
       <h2>Vendas do Dia</h2>
@@ -32,7 +32,7 @@
     </div>
   </section>
 
-  <!-- Seção: Produtos Mais Vendidos -->
+  <!-- Produtos Mais Vendidos -->
   <section>
     <h2>📈 Produtos Mais Vendidos</h2>
     <% if (maisVendidos.length > 0) { %>
@@ -46,7 +46,7 @@
     <% } %>
   </section>
 
-  <!-- Seção: Estoque -->
+  <!-- Estoque -->
   <section class="grid">
     <div class="card azul">
       <h2>Total de Produtos</h2>
@@ -62,12 +62,14 @@
     </div>
     <div class="card laranja">
       <h2>Caixa do Dia</h2>
-      <p>Dinheiro: R$ <%= caixa.dinheiro?.toFixed(2) || 0 %><br>
-         Pix: R$ <%= caixa.pix?.toFixed(2) || 0 %></p>
+      <p>
+        Dinheiro: R$ <%= caixa.dinheiro?.toFixed(2) || '0.00' %><br>
+        Pix: R$ <%= caixa.pix?.toFixed(2) || '0.00' %>
+      </p>
     </div>
   </section>
 
-  <!-- Seção: Últimas Movimentações -->
+  <!-- Últimas Movimentações -->
   <section>
     <h2>📄 Últimas Movimentações</h2>
     <% if (ultimasMovs.length > 0) { %>

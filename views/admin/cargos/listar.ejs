@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cargos - Painel Admin</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    a.btn {
+      display: inline-block;
+      padding: 6px 12px;
+      background-color: #215a6d;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    a.btn:hover {
+      background-color: #3ca2a2;
+    }
+    a.edit-link {
+      color: #215a6d;
+      text-decoration: none;
+    }
+    a.edit-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Cargos</h1>
+
+  <a href="/admin/cargos/novo" class="btn">+ Novo Cargo</a>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome do Cargo</th>
+        <th>Permissões</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if(cargos.length === 0) { %>
+        <tr>
+          <td colspan="4" style="text-align:center;">Nenhum cargo cadastrado.</td>
+        </tr>
+      <% } else { %>
+        <% cargos.forEach(cargo => { %>
+          <tr>
+            <td><%= cargo.id %></td>
+            <td><%= cargo.nome %></td>
+            <td><%= cargo.permissoes ? cargo.permissoes.split(',').join(', ') : 'Nenhuma' %></td>
+            <td>
+              <a href="/admin/cargos/<%= cargo.id %>" class="edit-link">Editar</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+
+  <p><a href="/dashboard">← Voltar ao Dashboard</a></p>
+</body>
+</html>

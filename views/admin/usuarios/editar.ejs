@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Funcionário - <%= usuario.nome %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #215a6d;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, select {
+      display: block;
+      width: 300px;
+      padding: 6px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #215a6d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3ca2a2;
+    }
+    .erro {
+      color: red;
+      margin-bottom: 15px;
+    }
+    a {
+      display: inline-block;
+      margin-top: 15px;
+      text-decoration: none;
+      color: #215a6d;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Editar Funcionário</h1>
+
+  <% if (typeof erro !== 'undefined') { %>
+    <p class="erro"><%= erro %></p>
+  <% } %>
+
+  <form action="/admin/usuarios/<%= usuario.id %>/editar" method="POST">
+
+    <label>Nome:</label>
+    <input type="text" name="nome" value="<%= usuario.nome %>" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" value="<%= usuario.email %>" required>
+
+    <label>Senha (deixe em branco para manter):</label>
+    <input type="password" name="senha">
+
+    <label>Cargo:</label>
+    <select name="cargo_id" required>
+      <% cargos.forEach(cargo => { %>
+        <option value="<%= cargo.id %>" <%= cargo.id === usuario.cargo_id ? 'selected' : '' %>><%= cargo.nome %></option>
+      <% }) %>
+    </select>
+
+    <button type="submit">Salvar</button>
+  </form>
+
+  <p><a href="/admin/usuarios">Voltar</a></p>
+
+</body>
+</html>

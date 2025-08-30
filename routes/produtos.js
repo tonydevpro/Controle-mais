@@ -1,32 +1,68 @@
+// routes/produtos.js
 const express = require('express');
 const router = express.Router();
 const controlador = require('../controllers/produtosControladores');
-const verificarAutenticacao = require('../middlewares/autenticacao');
-
+const { verificarAutenticacao, verificarPermissao } = require('../middlewares');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-router.post('/importar', verificarAutenticacao, upload.single('arquivo'), controlador.importarProdutos);
+// Importar produtos via CSV
+router.post(
+  '/importar',
+  verificarAutenticacao,
+  verificarPermissao('produtos_importar'),
+  upload.single('arquivo'),
+  controlador.importarProdutos
+);
 
-
-// Middleware para verificar autenticação
-router.get('/', verificarAutenticacao, controlador.listar); 
-// Página lista todos os produtos
-//router.get('/', controlador.listar);
+// Listar produtos
+router.get(
+  '/',
+  verificarAutenticacao,
+  verificarPermissao('produtos_listar'),
+  controlador.listar
+);
 
 // Formulário para adicionar novo produto
-router.get('/adicionar', controlador.formAdicionar);
+router.get(
+  '/adicionar',
+  verificarAutenticacao,
+  verificarPermissao('produtos_adicionar'),
+  controlador.formAdicionar
+);
 
-// Salvar novo produto (POST)
-router.post('/salvar', controlador.salvar);
+// Salvar novo produto
+router.post(
+  '/salvar',
+  verificarAutenticacao,
+  verificarPermissao('produtos_salvar'),
+  upload.single('imagem'),
+  controlador.salvar
+);
 
-// Formulário para editar produto (GET)
-router.get('/editar/:id', controlador.formEditar);
+// Formulário para editar produto
+router.get(
+  '/editar/:id',
+  verificarAutenticacao,
+  verificarPermissao('produtos_editar'),
+  controlador.formEditar
+);
 
-// Atualizar produto (POST)
-router.post('/editar/:id', controlador.atualizarProduto);
+// Atualizar produto
+router.post(
+  '/editar/:id',
+  verificarAutenticacao,
+  verificarPermissao('produtos_editar'),
+  upload.single('imagem'),
+  controlador.atualizarProduto
+);
 
-// Deletar produto (POST)
-router.post('/excluir/:id', controlador.deletarProduto);
+// Deletar produto
+router.post(
+  '/excluir/:id',
+  verificarAutenticacao,
+  verificarPermissao('produtos_excluir'),
+  controlador.deletarProduto
+);
 
 module.exports = router;

@@ -1,38 +1,51 @@
 <link rel="stylesheet" href="/css/header.css">
-<header >
-  <h1><a href="/" >Controle+</a></h1>
+
+<header class="header">
+  <div class="logo">
+    <h1><a href="/">Controle+</a></h1>
+  </div>
 
   <% if (usuario) { %>
-    <nav>
-      <button id="menu-toggle">&#9776;</button>
-  <ul id="menu">
-    <li><a href="/dashboard">Início</a></li>
-    <li><a href="/produtos">Produtos</a></li>
-    <li><a href="/movimentacoes">Movimentações</a></li>
-    <li><a href="/dashboard/financeiro">Financeiro</a></li>
-    <li><a href="/dashboard/dashboard">Dashboard</a></li>
-    <li><a href="/pdv">PDV</a></li>
-    <li><a href="/vendas">Vendas</a></li>
-    <li><a href="/vendas/relatorio">Relatório</a></li>
-    <li><a href="/usuario/gerenciar">Usuários</a></li>
-    
-    <li><a href="/logout">Sair</a></li>
-  </ul>
-</nav>
+    <nav class="nav-usuario">
+      <button id="menu-toggle" class="menu-toggle">&#9776;</button>
 
+      <% 
+        const menuItems = [
+          { label: 'Início', href: '/dashboard', permissao: 'dashboard_principal' },
+          { label: 'Produtos', href: '/produtos', permissao: 'produtos_listar' },
+          { label: 'Movimentações', href: '/movimentacoes', permissao: 'movimentacoes_listar' },
+          { label: 'Financeiro', href: '/dashboard/financeiro', permissao: 'dashboard_financeiro' },
+          { label: 'Dashboard', href: '/dashboard/dashboard', permissao: 'dashboard_geral' },
+          { label: 'PDV', href: '/pdv', permissao: 'pdv_acessar' },
+          { label: 'Vendas', href: '/vendas', permissao: 'vendas_listar' },
+          { label: 'Relatório', href: '/vendas/relatorio', permissao: 'vendas_relatorio_ver' },
+          { label: 'Usuários', href: '/usuario/gerenciar', permissao: 'usuarios_ver' },
+          { label: 'Cargos', href: '/admin/cargos', permissao: 'admin' },
+          { label: 'Funcionários', href: '/admin/usuarios', permissao: 'admin' },
+          { label: 'Sair', href: '/logout', permissao: null }
+        ];
+      %>
+
+      <ul id="menu" class="menu">
+        <% menuItems.forEach(item => { %>
+          <% if (!item.permissao || usuario.permissoes.includes(item.permissao)) { %>
+            <li><a href="<%= item.href %>"><%= item.label %></a></li>
+          <% } %>
+        <% }) %>
+      </ul>
+    </nav>
   <% } else { %>
-    <nav>
-      <a href="/login" style="margin-right: 1rem; color: white;">Login</a>
-      <a href="/registrar" style="color: white;">Registrar</a>
+    <nav class="nav-visitante">
+      <a href="/login">Login</a>
+      <a href="/registrar">Registrar</a>
     </nav>
   <% } %>
 
   <script>
-  document.getElementById('menu-toggle')?.addEventListener('click', function () {
-    document.getElementById('menu')?.classList.toggle('show');
-  });
+    document.getElementById('menu-toggle')?.addEventListener('click', function () {
+      document.getElementById('menu')?.classList.toggle('show');
+    });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </header>

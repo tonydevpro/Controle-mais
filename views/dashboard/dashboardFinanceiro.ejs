@@ -1,174 +1,141 @@
 <link rel="stylesheet" href="/css/dashboardFinanceiro.css">
 <%- include('../partials/header') %>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
-<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- DataTables CSS e JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-<!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="pagina-financeiro">
-<form method="GET" action="/dashboard/financeiro">
-  <label>De: <input type="date" name="data_inicio" value="<%= data_inicio || '' %>"></label>
-  <label>Até: <input type="date" name="data_fim" value="<%= data_fim || '' %>"></label>
-  <button type="submit">Filtrar</button>
-  <a href="/dashboard-financeiro">Limpar</a>
-</form>
 
+  <form method="GET" action="/dashboard/financeiro">
+    <label>De: <input type="date" name="data_inicio" value="<%= data_inicio || '' %>"></label>
+    <label>Até: <input type="date" name="data_fim" value="<%= data_fim || '' %>"></label>
+    <button type="submit">Filtrar</button>
+    <a href="/dashboard-financeiro">Limpar</a>
+  </form>
 
-<h1>📊 Dashboard Financeiro</h1>
+  <h1>📊 Dashboard Financeiro</h1>
 
-<br>
-<div class="kpi-cards">
-  <div class="kpi-card">
-    <h3>📦 Estoque Total</h3>
-    <p><%= totalEstoque %></p>
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <h3>📦 Estoque Total</h3>
+      <p><%= totalEstoque %></p>
+    </div>
+    <div class="kpi-card">
+      <h3>💰 Valor Bruto</h3>
+      <p>R$ <%= totalBruto.toFixed(2) %></p>
+    </div>
+    <div class="kpi-card">
+      <h3>🧾 Custo Total</h3>
+      <p>R$ <%= totalCusto.toFixed(2) %></p>
+    </div>
+    <div class="kpi-card">
+      <h3>📈 Lucro Líquido</h3>
+      <p>R$ <%= lucroLiquido.toFixed(2) %></p>
+    </div>
+    <div class="kpi-card">
+      <h3>📊 Margem Média</h3>
+      <p><%= margemLucro %> %</p>
+    </div>
   </div>
-  <div class="kpi-card">
-    <h3>💰 Valor Bruto</h3>
-    <p>R$ <%= totalBruto.toFixed(2) %></p>
-  </div>
-  <div class="kpi-card">
-    <h3>🧾 Custo Total</h3>
-    <p>R$ <%= totalCusto.toFixed(2) %></p>
-  </div>
-  <div class="kpi-card">
-    <h3>📈 Lucro Líquido</h3>
-    <p>R$ <%= lucroLiquido.toFixed(2) %></p>
-  </div>
-  <div class="kpi-card">
-    <h3>📊 Margem Média</h3>
-    <p><%= margemLucro %> %</p>
-  </div>
-</div>
-<br>
 
-<div style="max-width: 700px; margin: 20px auto;">
-  <canvas id="financeChart"></canvas>
+  <div style="max-width: 700px; margin: 20px auto;">
+    <canvas id="financeChart"></canvas>
+    <script>
+      const ctx = document.getElementById('financeChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Valor Bruto', 'Valor Custo', 'Lucro Líquido'],
+          datasets: [{
+            label: 'Valores em R$',
+            data: [<%= totalBruto.toFixed(2) %>, <%= totalCusto.toFixed(2) %>, <%= lucroLiquido.toFixed(2) %>],
+            backgroundColor: ['rgba(54,162,235,0.7)','rgba(255,99,132,0.7)','rgba(75,192,192,0.7)'],
+            borderColor: ['rgba(54,162,235,1)','rgba(255,99,132,1)','rgba(75,192,192,1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: { y: { beginAtZero: true } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    </script>
+  </div>
+
+  <h2>📈 Margem de Lucro por Produto</h2>
+  <canvas id="graficoMargem" width="400" height="200"></canvas>
   <script>
-  const ctx = document.getElementById('financeChart').getContext('2d');
-
-  const financeChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Valor Bruto', 'Valor Custo', 'Lucro Líquido'],
-      datasets: [{
-        label: 'Valores em R$',
-        data: [<%= totalBruto.toFixed(2) %>, <%= totalCusto.toFixed(2) %>, <%= lucroLiquido.toFixed(2) %>],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.7)', // azul
-          'rgba(255, 99, 132, 0.7)', // vermelho
-          'rgba(75, 192, 192, 0.7)'  // verde água
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(75, 192, 192, 1)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+    const ctx2 = document.getElementById('graficoMargem').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(produtosComMargem.map(p => p.nome)) %>,
+        datasets: [{
+          label: 'Margem de Lucro (%)',
+          data: <%- JSON.stringify(produtosComMargem.map(p => parseFloat(p.margem))) %>,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
       },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
-</script>
-
-
-<canvas id="graficoMargem" width="400" height="200"></canvas>
-
-<script>
-  const ctx2 = document.getElementById('graficoMargem').getContext('2d');
-
-  const grafico = new Chart(ctx2, {
-    type: 'bar',
-    data: {
-      labels: <%- JSON.stringify(produtosComMargem.map(p => p.nome)) %>,
-      datasets: [{
-        label: 'Margem de Lucro (%)',
-        data: <%- JSON.stringify(produtosComMargem.map(p => parseFloat(p.margem))) %>,
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: '%' }
+      options: {
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: '%' } }
         }
       }
-    }
-  });
+    });
+  </script>
 
-
-
-</script>
-<script>  $(document).ready(function() {
-  $('#tabelaMargem').DataTable({
-    // Você pode personalizar opções aqui, ex:
-    pageLength: 10,     // itens por página
-    lengthMenu: [5, 10, 25, 50],  // opções de paginação
-    language: {
-      search: "Buscar:",
-      lengthMenu: "Mostrar _MENU_ registros",
-      info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-      paginate: {
-        first: "Primeiro",
-        last: "Último",
-        next: "Próximo",
-        previous: "Anterior"
-      }
-    }
-  });
-}); </script>
-
-</div>
-
-<ul>
-  <li><strong>Quantidade total em estoque:</strong> <%= totalEstoque %></li>
-  <li><strong>Valor bruto em movimentações de saída:</strong> R$ <%= totalBruto.toFixed(2) %></li>
-  <li><strong>Custo total nas movimentações de saída:</strong> R$ <%= totalCusto.toFixed(2) %></li>
-  <li><strong>Lucro líquido estimado:</strong> R$ <%= lucroLiquido.toFixed(2) %></li>
-  <li><strong>Margem de lucro média:</strong> <%= margemLucro %> %</li>
-</ul>
-
-
-<p>Total de Entradas: <%= totalEntrada %></p>
-<p>Total de Saídas: <%= totalSaida %></p>
-
-
-<h2>📈 Margem de Lucro por Produto</h2>
-<table id="tabelaMargem" border="1" cellpadding="5">
-  <thead>
-    <tr>
-      <th>Produto</th>
-      <th>Preço Custo</th>
-      <th>Preço Venda</th>
-      <th>Margem Lucro (%)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% produtosComMargem.forEach(prod => { %>
+  <table id="tabelaMargem" border="1" cellpadding="5">
+    <thead>
       <tr>
-        <td><%= prod.nome %></td>
-        <td>R$ <%= prod.preco_custo.toFixed(2) %></td>
-        <td>R$ <%= prod.preco_venda.toFixed(2) %></td>
-        <td><%= prod.margem %> %</td>
+        <th>Produto</th>
+        <th>Preço Custo</th>
+        <th>Preço Venda</th>
+        <th>Margem Lucro (%)</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% produtosComMargem.forEach(prod => { %>
+        <tr>
+          <td><%= prod.nome %></td>
+          <td>R$ <%= prod.preco_custo.toFixed(2) %></td>
+          <td>R$ <%= prod.preco_venda.toFixed(2) %></td>
+          <td><%= prod.margem %> %</td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <script>
+    $(document).ready(function() {
+      $('#tabelaMargem').DataTable({
+        pageLength: 10,
+        lengthMenu: [5,10,25,50],
+        language: {
+          search: "Buscar:",
+          lengthMenu: "Mostrar _MENU_ registros",
+          info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+          paginate: { first:"Primeiro", last:"Último", next:"Próximo", previous:"Anterior" }
+        }
+      });
+    });
+  </script>
+
+  <ul>
+    <li><strong>Quantidade total em estoque:</strong> <%= totalEstoque %></li>
+    <li><strong>Valor bruto:</strong> R$ <%= totalBruto.toFixed(2) %></li>
+    <li><strong>Custo total:</strong> R$ <%= totalCusto.toFixed(2) %></li>
+    <li><strong>Lucro líquido:</strong> R$ <%= lucroLiquido.toFixed(2) %></li>
+    <li><strong>Margem média:</strong> <%= margemLucro %> %</li>
+  </ul>
+
+  <p>Total de Entradas: <%= totalEntrada %></p>
+  <p>Total de Saídas: <%= totalSaida %></p>
 
 </div>
-
 
 <%- include('../partials/footer') %>

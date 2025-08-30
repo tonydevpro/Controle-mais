@@ -1,124 +1,145 @@
+// controllers/produtosControladores.js
+const Produto = require('../models/produto');
 const conectar = require('../banco/conexao');
-const fs = require('fs');
-const csv = require('csv-parser');
 
 
-
+// Listar produtos da loja
 exports.listar = async (req, res) => {
-  try {
-    
-    const [produtos] = await conectar.execute('SELECT * FROM produtos WHERE usuario_id = ?',
-  [req.session.usuario.id]);
-    
-    res.render('produtos/listar', { produtos });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).send('Erro ao buscar produtos');
-  }
-};
+  console.log("➡️ Entrou no controller de produtos");
 
-exports.formAdicionar = (req, res) => {
-  res.render('produtos/formAdicionar');
-};
-
-exports.salvar = async (req, res) => {
   try {
-    const nome = req.body.nome;
-    const descricao = req.body.descricao;
-    const preco_custo = req.body.preco_custo ? parseFloat(req.body.preco_custo) : 0;
-    const preco_venda = parseFloat(req.body.preco_venda);
-    const quantidade = req.body.quantidade ? parseInt(req.body.quantidade) : 0;
-    
-    await conectar.execute(
-      'INSERT INTO produtos (nome, descricao, preco_custo, preco_venda, quantidade, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [nome, descricao, preco_custo || 0, preco_venda, quantidade || 0, req.session.usuario.id]
-    );
-    
-    res.redirect('/produtos');
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).send('Erro ao salvar produto');
-  }
-};
+    const usuario = req.session.usuario;
+    console.log("Usuário na sessão:", usuario);
 
-exports.formEditar = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const [resultado] = await conectar.execute('SELECT * FROM produtos WHERE id = ? AND usuario_id = ?',
-  [id, req.session.usuario.id]);
-    
-    if (resultado.length === 0) {
-      return res.status(404).send('Produto não encontrado');
+    if (!usuario) {
+      console.log("⛔ Nenhum usuário na sessão");
+      return res.redirect('/login');
     }
-    res.render('produtos/formEditar', { produto: resultado[0] });
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).send('Erro ao carregar formulário de edição');
-  }
-};
 
-exports.atualizarProduto = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nome, descricao, preco_custo, preco_venda, quantidade } = req.body;
-    
-    await conectar.execute(
-      'UPDATE produtos SET nome=?, descricao=?, preco_custo=?, preco_venda=?, quantidade=? WHERE id=? AND usuario_id=?',
-      [nome, descricao, preco_custo || 0, preco_venda, quantidade || 0, id, req.session.usuario.id]
+    console.log("Buscando produtos da loja:", usuario.loja_id);
+
+    const [produtos] = await conectar.execute(
+      'SELECT * FROM produtos WHERE loja_id = ?',
+      [usuario.loja_id]
     );
-    
-    res.redirect('/produtos');
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).send('Erro ao atualizar produto');
+
+    console.log("Produtos encontrados:", produtos.length);
+
+    res.render('produtos/listar', { produtos });
+    console.log("✅ Renderizou página de produtos");
+  } catch (error) {
+    console.error("❌ Erro no controller de produtos:", error.message);
+    res.status(500).send("Erro ao carregar produtos");
   }
 };
 
-exports.deletarProduto = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    await conectar.execute('DELETE FROM produtos WHERE id = ? AND usuario_id = ?', [id, req.session.usuario.id]);
-    
-    res.redirect('/produtos');
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).send('Erro ao deletar produto');
-  }
+
+// Formulário para adicionar novo produto
+exports.formAdicionar = (req, res) => {
+  res.render('produtos/adicionar', { usuarioLogado: req.session.usuario });
 };
 
-exports.importarProdutos = async (req, res) => {
-  const usuarioId = req.session.usuario.id;
-  const caminho = req.file.path;
-  const produtos = [];
+// Salvar novo produto
+exports.salvar = (req, res) => {
+  const usuario_id = req.session.usuario.id;
+  const loja_id = req.session.usuario.loja_id;
 
-  fs.createReadStream(caminho)
-    .pipe(csv()) // espera colunas: nome, quantidade, preco_custo, preco_venda
-    .on('data', (linha) => {
-      produtos.push([
-        linha.nome,
-        parseInt(linha.quantidade),
-        parseFloat(linha.preco_custo),
-        parseFloat(linha.preco_venda),
-        usuarioId
-      ]);
-    })
-    .on('end', async () => {
-      try {
-        await conectar.query(`
-          INSERT INTO produtos (nome, quantidade, preco_custo, preco_venda, usuario_id)
-          VALUES ?
-        `, [produtos]);
+  const produto = {
+    nome: req.body.nome,
+    descricao: req.body.descricao,
+    preco_custo: req.body.preco_custo,
+    preco_venda: req.body.preco_venda,
+    quantidade: req.body.quantidade,
+    imagem: req.file ? req.file.filename : null,
+    usuario_id,   // quem cadastrou
+    loja_id       // a loja que é dona do produto
+  };
 
-        fs.unlinkSync(caminho); // remove o arquivo temporário
-        req.flash('sucesso', 'Produtos importados com sucesso!');
-        res.locals.mensagens = req.flash('sucesso');
-        res.redirect('/produtos'); // ou para onde quiser
-      } catch (erro) {
-        console.error('Erro ao importar produtos:', erro);
-        res.status(500).send('Erro ao importar produtos.');
-      }
+  Produto.inserir(produto, (err) => {
+    if (err) {
+      console.error('Erro ao cadastrar produto:', err);
+      return res.status(500).send('Erro ao cadastrar produto');
+    }
+    res.redirect('/produtos');
+  });
+};
+
+// Formulário para editar produto
+exports.formEditar = (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const produtoId = req.params.id;
+
+  Produto.buscarPorId(produtoId, loja_id, (err, produto) => {
+    if (err) {
+      console.error('Erro ao buscar produto para edição:', err);
+      return res.status(500).send('Erro ao buscar produto');
+    }
+
+    if (!produto) {
+      return res.status(404).send('Produto não encontrado ou não pertence a esta loja.');
+    }
+
+    res.render('produtos/editar', { 
+      produto, 
+      usuarioLogado: req.session.usuario 
     });
+  });
 };
 
+// Atualizar produto
+exports.atualizarProduto = (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const produtoId = req.params.id;
+
+  const produto = {
+    nome: req.body.nome,
+    descricao: req.body.descricao,
+    preco_custo: req.body.preco_custo,
+    preco_venda: req.body.preco_venda,
+    quantidade: req.body.quantidade,
+    imagem: req.file ? req.file.filename : req.body.imagem_antiga
+  };
+
+  Produto.atualizar(produtoId, loja_id, produto, (err, resultado) => {
+  if (err) {
+    console.error('Erro ao atualizar produto:', err);
+    return res.status(500).send('Erro ao atualizar produto');
+  }
+  if (resultado.affectedRows === 0) {
+    return res.status(403).send('Produto não encontrado ou não pertence a esta loja.');
+  }
+  res.redirect('/produtos');
+});
+
+};
+
+// Deletar produto
+exports.deletarProduto = (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+  const produtoId = req.params.id;
+
+  Produto.excluir(produtoId, loja_id, (err, resultado) => {
+    if (err) {
+      console.error('Erro ao excluir produto:', err);
+      return res.status(500).send('Erro ao excluir produto');
+    }
+    if (resultado.affectedRows === 0) {
+      return res.status(403).send('Produto não encontrado ou não pertence a esta loja.');
+    }
+    res.redirect('/produtos');
+  });
+};
+
+// Importar produtos via CSV
+exports.importarProdutos = (req, res) => {
+  const loja_id = req.session.usuario.loja_id;
+
+  if (!req.file) {
+    return res.status(400).send('Nenhum arquivo enviado.');
+  }
+
+  console.log('Arquivo CSV recebido:', req.file.filename);
+  // TODO: Implementar leitura do CSV e salvar produtos vinculando a loja_id
+
+  res.redirect('/produtos');
+};

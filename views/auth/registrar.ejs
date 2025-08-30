@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro - Controle+</title>
+  <title>Registrar Loja - Controle+</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -34,6 +34,7 @@
 
     label {
       margin-top: 10px;
+      font-weight: bold;
     }
 
     input {
@@ -41,6 +42,7 @@
       border-radius: 5px;
       border: 1px solid #ccc;
       margin-top: 5px;
+      font-size: 14px;
     }
 
     button {
@@ -51,15 +53,21 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #3ca2a2;
     }
 
     .erro {
       background: #ffe5e5;
       color: #c00;
       padding: 10px;
-      margin-top: 10px;
       border-radius: 5px;
+      margin-top: 10px;
       text-align: center;
+      font-weight: bold;
     }
 
     .link-login {
@@ -70,32 +78,40 @@
     .link-login a {
       color: #215a6d;
       text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link-login a:hover {
+      color: #3ca2a2;
     }
   </style>
 </head>
 <body>
   <div class="registro-container">
-    <h2>Criar Conta no Controle+</h2>
+    <h2>Criar Nova Loja</h2>
 
     <% if (erro) { %>
-      <div class="erro"><%= erro %></div>
+      <div class="erro"><%= Array.isArray(erro) ? erro[0] : erro %></div>
     <% } %>
 
-    <form method="POST" action="/registrar">
-      <label for="nome">Nome:</label>
-      <input type="text" name="nome" required>
+    <form action="/registrar" method="POST">
+      <label>Nome da Loja:</label>
+      <input type="text" name="nome_loja" required>
 
-      <label for="email">E-mail:</label>
+      <label>Seu Nome:</label>
+      <input type="text" name="nome_admin" required>
+
+      <label>Email:</label>
       <input type="email" name="email" required>
 
-      <label for="senha">Senha:</label>
+      <label>Senha:</label>
       <input type="password" name="senha" required>
 
-      <button type="submit">Cadastrar</button>
+      <button type="submit">Criar Loja</button>
     </form>
 
     <div class="link-login">
-      <p>Já tem uma conta? <a href="/login">Entrar</a></p>
+      <p>Já tem uma conta? <a href="/login">Faça login</a></p>
     </div>
   </div>
 </body>

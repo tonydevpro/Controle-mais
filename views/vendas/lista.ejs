@@ -18,7 +18,7 @@
   </thead>
   <tbody>
     <% if (vendas.length === 0) { %>
-      <tr><td colspan="5">Nenhuma venda registrada.</td></tr>
+      <tr><td colspan="6" style="text-align:center;">Nenhuma venda registrada.</td></tr>
     <% } else { %>
       <% vendas.forEach(v => { %>
         <tr>
@@ -26,12 +26,12 @@
           <td><%= new Date(v.data).toLocaleString() %></td>
           <td>R$ <%= (v.total ? Number(v.total) : 0).toFixed(2) %></td>
           <td>
-            <a href="/vendas/<%= v.id %>/recibo-pdf" style="text-decoration: none;" target="_blank">📄Recibo</a>
+            <a href="/vendas/<%= v.id %>/recibo-pdf" target="_blank">📄 Recibo</a>
           </td>
           <td><a href="/vendas/<%= v.id %>">Ver Detalhes</a></td>
-          <td>
+          <td style="text-align:center;">
             <form action="/vendas/excluir/<%= v.id %>" method="POST" style="display:inline" onsubmit="return confirm('Confirma exclusão da venda #<%= v.id %>?')">
-              <button type="submit" style="background:none; border:none; color:red; cursor:pointer;">Excluir</button>
+              <button type="submit" class="btn-excluir">Excluir</button>
             </form>
           </td>
         </tr>
@@ -40,9 +40,8 @@
   </tbody>
 </table>
 
-<!-- jQuery (obrigatório para DataTables) -->
+<!-- jQuery e DataTables JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
 <script>
@@ -60,7 +59,8 @@
         }
       },
       pageLength: 10,
-      lengthMenu: [5, 10, 25, 50]
+      lengthMenu: [5, 10, 25, 50],
+      order: [[1, 'desc']] // ordena por data descendente
     });
   });
 </script>

@@ -1,27 +1,37 @@
 <%- include('../partials/header', { usuario: usuario }) %>
-<h2>Gerenciar Usuários</h2>
-<table>
-  <thead>
-    <tr><th>Nome</th><th>Email</th><th>Tipo</th><th>Ação</th></tr>
-  </thead>
-  <tbody>
-    <% usuarios.forEach(u => { %>
+
+<main class="pagina-lista">
+  <h2>Gerenciar Usuários</h2>
+
+  <table>
+    <thead>
       <tr>
-        <td><%= u.nome %></td>
-        <td><%= u.email %></td>
-        <td>
-          <form action="/usuario/atualizar-tipo" method="POST">
-            <input type="hidden" name="id" value="<%= u.id %>">
-            <select name="tipo">
-              <option value="usuario" <%= u.tipo === 'usuario' ? 'selected' : '' %>>Usuário</option>
-              <option value="admin" <%= u.tipo === 'admin' ? 'selected' : '' %>>Admin</option>
-            </select>
-            <button type="submit">Salvar</button>
-          </form>
-        </td>
-        <td><%= u.tipo === 'admin' ? '👑' : '' %></td>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Tipo</th>
+        <th>Admin</th>
       </tr>
-    <% }) %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% usuarios.forEach(u => { %>
+        <tr>
+          <td><%= u.nome %></td>
+          <td><%= u.email %></td>
+          <td>
+            <form action="/usuario/atualizar-tipo" method="POST" style="display:flex; gap:0.5rem; align-items:center;">
+              <input type="hidden" name="id" value="<%= u.id %>">
+              <select name="tipo">
+                <option value="usuario" <%= u.tipo === 'usuario' ? 'selected' : '' %>>Usuário</option>
+                <option value="admin" <%= u.tipo === 'admin' ? 'selected' : '' %>>Admin</option>
+              </select>
+              <button type="submit">Salvar</button>
+            </form>
+          </td>
+          <td style="text-align:center;"><%= u.tipo === 'admin' ? '👑' : '' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</main>
+
 <%- include('../partials/footer') %>

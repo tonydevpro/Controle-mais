@@ -1,25 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashboardController');
-const verificarAutenticacao = require('../middlewares/autenticacao');
+const { verificarAutenticacao, verificarPermissao } = require('../middlewares');
 
+// Todas as rotas exigem autenticação
+router.use(verificarAutenticacao);
 
-// Middleware para verificar autenticação
-router.get('/dashboard', verificarAutenticacao, dashboardController.exibirDashboard);
+// Dashboard principal
+router.get(
+  '/dashboard', 
+  verificarPermissao('dashboard_geral'), 
+  dashboardController.exibirDashboard
+);
 
-// Rota para exibir o dashboard principal
-router.get('/', verificarAutenticacao, dashboardController.exibirDashboardPrincipal);
+// Dashboard inicial (home)
+router.get(
+  '/', 
+  verificarPermissao('dashboard_principal'), 
+  dashboardController.exibirDashboardPrincipal
+);
 
+// Exportar CSV
+router.get(
+  '/exportar', 
+  verificarPermissao('dashboard_exportar_csv'), 
+  dashboardController.exportarCSV
+);
 
-// Rota para exibir o dashboard
-//router.get('/', dashboardController.exibirDashboard);
+// Exportar PDF
+router.get(
+  '/exportar-pdf', 
+  verificarPermissao('dashboard_exportar_pdf'), 
+  dashboardController.exportarPDF
+);
 
-router.get('/exportar', dashboardController.exportarCSV);
-// Rota para exportar dados em CSV
+// Dashboard financeiro
+router.get(
+  '/financeiro', 
+  verificarPermissao('dashboard_financeiro'), 
+  dashboardController.dashboardFinanceiro
+);
 
-router.get('/exportar-pdf', dashboardController.exportarPDF);
-// Rota para exportar dados em PDF
-
-router.get('/financeiro', verificarAutenticacao, dashboardController.dashboardFinanceiro);
-// Rota para exibir o dashboard financeiro
 module.exports = router;

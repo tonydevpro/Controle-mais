@@ -1,10 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const usuariosController = require('../controllers/usuariosController');
-const autenticarUsuario = require('../middlewares/autenticacao');
-const verificarAdmin = require('../middlewares/verificarAdmin');
+const { verificarAutenticacao, verificarAdmin, verificarPermissao } = require('../middlewares');
 
-router.get('/gerenciar', autenticarUsuario, verificarAdmin, usuariosController.gerenciarUsuarios);
-router.post('/atualizar-tipo', autenticarUsuario, verificarAdmin, usuariosController.atualizarTipo);
+// Gerenciar usuários (somente dono/admin com permissão)
+router.get(
+  '/gerenciar',
+  verificarAutenticacao,
+  verificarPermissao('usuarios_gerenciar'),
+  usuariosController.gerenciarUsuarios
+);
+
+// Atualizar tipo/cargo de usuário
+router.post(
+  '/atualizar-tipo',
+  verificarAutenticacao,
+  verificarPermissao('usuarios_atualizar_tipo'),
+  usuariosController.atualizarTipo
+);
 
 module.exports = router;

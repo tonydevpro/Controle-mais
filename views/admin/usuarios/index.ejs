@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Funcionários da Loja</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #215a6d;
+    }
+    a.btn {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 8px 15px;
+      background-color: #215a6d;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    a.btn:hover {
+      background-color: #3ca2a2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    form {
+      display: inline;
+    }
+    button {
+      padding: 5px 10px;
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c9302c;
+    }
+    .sem-funcionarios {
+      margin-top: 20px;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Funcionários da Loja</h1>
+
+  <a href="/admin/usuarios/novo" class="btn">+ Novo Funcionário</a>
+
+  <% if (usuarios.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Cargo</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% usuarios.forEach(usuario => { %>
+          <tr>
+            <td><%= usuario.nome %></td>
+            <td><%= usuario.email %></td>
+            <td><%= usuario.cargo || 'Sem cargo' %></td>
+            <td>
+              <a href="/admin/usuarios/<%= usuario.id %>/editar">Editar</a> |
+              <form action="/admin/usuarios/<%= usuario.id %>/excluir" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                <button type="submit">Excluir</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="sem-funcionarios">Nenhum funcionário cadastrado.</p>
+  <% } %>
+
+</body>
+</html>

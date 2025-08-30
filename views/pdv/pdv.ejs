@@ -2,26 +2,34 @@
 <link rel="stylesheet" href="/css/pdv.css" />
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
 
-<h2>PDV - Venda Rápida</h2>
+<main class="pdv-container">
+  <h2>PDV - Venda Rápida</h2>
 
-<form id="form-venda">
-  <input type="text" id="produto-input" placeholder="Digite o nome do produto" autocomplete="off" />
-  <input type="hidden" id="produto-id" />
-  <input type="number" id="quantidade" placeholder="Quantidade" min="1" />
-  <input type="number" id="desconto" placeholder="Desconto R$" min="0" step="0.01" />
+  <form id="form-venda">
+    <div class="form-group">
+      <input type="text" id="produto-input" placeholder="Digite o nome do produto" autocomplete="off" />
+      <input type="hidden" id="produto-id" />
+      <input type="number" id="quantidade" placeholder="Quantidade" min="1" />
+      <input type="number" id="desconto" placeholder="Desconto R$" min="0" step="0.01" />
+      <button type="button" onclick="adicionarItem()">Adicionar</button>
+    </div>
 
-  <button type="button" onclick="adicionarItem()">Adicionar</button>
+    <table id="tabela-itens">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Qtd</th>
+          <th>Preço und.</th>
+          <th>Total</th>
+          <th>Total com Desconto</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <table id="tabela-itens">
-    <thead>
-      <tr><th>Produto</th><th>Qtd</th><th>Preço und.</th><th>Total</th><th>Total com Desconto</th><th>Ação</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <p><strong>Total:</strong> R$ <span id="total-venda">0.00</span></p>
 
-
-
-  <p><strong>Total:</strong> R$ <span id="total-venda">0.00</span></p>
     <label for="forma_pagamento">Forma de Pagamento:</label>
     <select id="forma_pagamento" required>
       <option value="dinheiro">Dinheiro</option>
@@ -29,8 +37,10 @@
       <option value="debito">Débito</option>
       <option value="credito">Crédito</option>
     </select>
-  <button type="submit">Finalizar Venda</button>
-</form>
+
+    <button type="submit">Finalizar Venda</button>
+  </form>
+</main>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
@@ -38,7 +48,8 @@
 <script>
   const produtos = <%- JSON.stringify(produtos) %>;
   const itens = [];
-  // Inicializa o autocomplete
+
+  // Autocomplete para produtos
   $("#produto-input").autocomplete({
     source: produtos.map(p => ({
       label: `${p.nome} (Estoque: ${p.quantidade})`,
@@ -56,7 +67,7 @@
     }
   });
 
-  // Garante que o produto seja selecionado mesmo se o usuário só digitar e não clicar na sugestão
+  // Garantir seleção correta mesmo digitando manualmente
   $("#produto-input").on("change", function() {
     const nomeDigitado = $(this).val();
     const produtoSelecionado = produtos.find(p => p.nome === nomeDigitado);
@@ -78,10 +89,9 @@
     }
   });
 
+  // Adicionar item à venda
   window.adicionarItem = function() {
-    console.log('função adicionarItem chamada'); // debug
     const produto = $("#produto-input").data("produto");
-    console.log('Produto selecionado:', produto); // debug
     const quantidade = parseInt($("#quantidade").val());
     const desconto = parseFloat($("#desconto").val()) || 0;
 
@@ -99,7 +109,7 @@
 
     atualizarTabela();
 
-    // Limpa campos após adicionar
+    // Limpar campos
     $("#produto-input").val('').data("produto", null);
     $("#produto-id").val('');
     $("#quantidade").val('');
@@ -138,6 +148,7 @@
     atualizarTabela();
   }
 
+  // Finalizar venda
   document.getElementById('form-venda').addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -145,6 +156,7 @@
       alert("Adicione pelo menos um item antes de finalizar a venda.");
       return;
     }
+
     const forma_pagamento = document.getElementById('forma_pagamento').value;
     try {
       const res = await fetch('/pdv/finalizar', {
@@ -153,6 +165,7 @@
         body: JSON.stringify({ itens, forma_pagamento })
       });
       const json = await res.json();
+
       if (json.sucesso) {
         window.open(`/vendas/${json.vendaId}/recibo-pdf`, '_blank');
         alert('Venda realizada com sucesso!');

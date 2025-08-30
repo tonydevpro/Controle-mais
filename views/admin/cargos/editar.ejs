@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Cargo - <%= cargo.nome %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    legend {
+      font-weight: bold;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #215a6d;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #3ca2a2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Editar Cargo: <%= cargo.nome %></h1>
+
+  <form method="POST" action="/admin/cargos/<%= cargo.id %>">
+    <fieldset>
+      <legend>Permissões</legend>
+
+      <% if (todasPermissoes.length === 0) { %>
+        <p>Nenhuma permissão disponível.</p>
+      <% } else { %>
+        <% todasPermissoes.forEach(permissao => { %>
+          <label>
+            <input 
+              type="checkbox" 
+              name="permissoes" 
+              value="<%= permissao.chave %>" 
+              <% if (chavesCargo.includes(permissao.chave)) { %> checked <% } %> 
+            />
+            <strong><%= permissao.chave %></strong> — <%= permissao.descricao || '-' %>
+          </label>
+        <% }) %>
+      <% } %>
+
+    </fieldset>
+
+    <button type="submit">Salvar</button>
+  </form>
+
+  <p><a href="/admin/cargos">← Voltar à lista de cargos</a></p>
+</body>
+</html>
