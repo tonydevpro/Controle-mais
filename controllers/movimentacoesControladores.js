@@ -6,7 +6,7 @@ exports.adicionarMovimentacoes = async (req, res) => {
   try {
     const loja_id = req.session.usuario.loja_id;
     const [produtos] = await conectar.execute(
-      'SELECT id, nome FROM produtos WHERE loja_id = ? ORDER BY nome',
+      'SELECT id, nome FROM produtos WHERE loja_id = ? AND ativo = 1 ORDER BY nome',
       [loja_id]
     );
     res.render('movimentacoes/adicionarMovimentacoes', { produtos });
@@ -68,7 +68,7 @@ exports.formEditarMov = async (req, res) => {
     if (resultado.length === 0) return res.status(404).send('Movimentação não encontrada');
 
     const [produtos] = await conectar.execute(
-      'SELECT id, nome FROM produtos WHERE loja_id = ? ORDER BY nome',
+      'SELECT id, nome FROM produtos WHERE loja_id = ? AND ativo = 1 ORDER BY nome',
       [loja_id]
     );
 
@@ -98,7 +98,7 @@ exports.atualizarMov = async (req, res) => {
     // Reverter estoque da movimentação antiga
     const operadorReverso = movAntiga.tipo === 'entrada' ? '-' : '+';
     await conectar.execute(
-      `UPDATE produtos SET quantidade = quantidade ${operadorReverso} ? WHERE id = ? AND loja_id = ?`,
+      `UPDATE produtos SET quantidade = quantidade ${operadorReverso} ? WHERE id = ? AND loja_id = ? AND ativo = 1`,
       [movAntiga.quantidade, movAntiga.produto_id, loja_id]
     );
 
@@ -111,7 +111,7 @@ exports.atualizarMov = async (req, res) => {
     // Aplicar estoque da nova movimentação
     const operadorNovo = tipo === 'entrada' ? '+' : '-';
     await conectar.execute(
-      `UPDATE produtos SET quantidade = quantidade ${operadorNovo} ? WHERE id = ? AND loja_id = ?`,
+      `UPDATE produtos SET quantidade = quantidade ${operadorNovo} ? WHERE id = ? AND loja_id = ? AND ativo = 1`,
       [quantidade, produto_id, loja_id]
     );
 
@@ -139,7 +139,7 @@ exports.deletarMov = async (req, res) => {
     // Reverter estoque
     const operadorReverso = mov.tipo === 'entrada' ? '-' : '+';
     await conectar.execute(
-      `UPDATE produtos SET quantidade = quantidade ${operadorReverso} ? WHERE id = ? AND loja_id = ?`,
+      `UPDATE produtos SET quantidade = quantidade ${operadorReverso} ? WHERE id = ? AND loja_id = ? AND ativo = 1`,
       [mov.quantidade, mov.produto_id, loja_id]
     );
 

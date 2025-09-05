@@ -10,6 +10,7 @@ exports.exportarPDF = async (req, res) => {
   const { dataInicio, dataFim } = req.query;
 
   try {
+    // Histórico -> mantém todos, inclusive inativos
     const [movs] = await conectar.execute(
       `SELECT m.data, p.nome AS produto, m.tipo, m.quantidade, m.desconto, m.observacao 
        FROM movimentacoes m
@@ -62,6 +63,7 @@ exports.exportarCSV = async (req, res) => {
   const { dataInicio, dataFim } = req.query;
 
   try {
+    // Histórico -> mantém todos, inclusive inativos
     const [movs] = await conectar.execute(
       `SELECT m.data, p.nome AS produto, m.tipo, m.quantidade, m.desconto, m.observacao 
        FROM movimentacoes m
@@ -112,6 +114,7 @@ exports.exibirDashboard = async (req, res) => {
   }
 
   try {
+    // Estoque atual -> apenas produtos ativos
     const [resumo] = await conectar.execute(`
       SELECT 
         COUNT(*) AS totalProdutos,
@@ -120,9 +123,10 @@ exports.exibirDashboard = async (req, res) => {
         COALESCE(SUM(preco_venda * quantidade), 0) AS valorTotalEstoque,
         COALESCE(SUM(preco_venda * quantidade) - SUM(preco_custo * quantidade), 0) AS lucroTotal
       FROM produtos
-      WHERE loja_id = ?
+      WHERE loja_id = ? AND ativo = 1
     `, [loja_id]);
 
+    // Histórico -> mantém todos
     const [movimentacoes] = await conectar.execute(`
       SELECT DATE(m.data) as data, m.tipo, SUM(m.quantidade) AS total
       FROM movimentacoes m
@@ -140,7 +144,11 @@ exports.exibirDashboard = async (req, res) => {
       ORDER BY m.data DESC
     `, parametros);
 
-    const [produtos] = await conectar.execute('SELECT id, nome FROM produtos WHERE loja_id = ?', [loja_id]);
+    // Produtos para filtro -> apenas ativos
+    const [produtos] = await conectar.execute(
+      'SELECT id, nome FROM produtos WHERE loja_id = ? AND ativo = 1',
+      [loja_id]
+    );
 
     res.render('dashboard/dashboard', {
       totalProdutos: resumo[0].totalProdutos || 0,
@@ -178,6 +186,7 @@ exports.dashboardFinanceiro = async (req, res) => {
   }
 
   try {
+    // Histórico -> movimentações incluem todos
     const [movs] = await conectar.execute(`
       SELECT m.quantidade, m.tipo, p.preco_custo, p.preco_venda, m.desconto
       FROM movimentacoes m
@@ -204,8 +213,15 @@ exports.dashboardFinanceiro = async (req, res) => {
     const lucroLiquido = totalBruto - totalCusto;
     const margemLucro = totalCusto > 0 ? ((lucroLiquido / totalCusto) * 100).toFixed(2) : 0;
 
-    const [produtos] = await conectar.execute('SELECT nome, preco_custo, preco_venda FROM produtos WHERE loja_id = ?', [loja_id]);
-    const [estoque] = await conectar.execute('SELECT SUM(quantidade) AS totalEstoque FROM produtos WHERE loja_id = ?', [loja_id]);
+    // Estoque atual -> só ativos
+    const [produtos] = await conectar.execute(
+      'SELECT nome, preco_custo, preco_venda FROM produtos WHERE loja_id = ? AND ativo = 1',
+      [loja_id]
+    );
+    const [estoque] = await conectar.execute(
+      'SELECT SUM(quantidade) AS totalEstoque FROM produtos WHERE loja_id = ? AND ativo = 1',
+      [loja_id]
+    );
     const totalEstoque = estoque[0].totalEstoque || 0;
 
     const produtosComMargem = produtos.map(prod => ({
@@ -276,8 +292,10 @@ exports.exibirDashboardPrincipal = async (req, res) => {
       LIMIT 5
     `, [loja_id, loja_id]);
 
-    const [estoqueResumo] = await conectar.execute('SELECT COUNT(*) AS totalProdutos, SUM(quantidade) AS totalEstoque FROM produtos WHERE loja_id = ?', [loja_id]);
-    const [abaixoMinimo] = await conectar.execute('SELECT COUNT(*) AS abaixo FROM produtos WHERE loja_id = ? AND quantidade <= estoque_minimo', [loja_id]);
+    // Estoque atual -> só ativos
+    const [estoqueResumo] = await conectar.execute('SELECT COUNT(*) AS totalProdutos, SUM(quantidade) AS totalEstoque FROM produtos WHERE loja_id = ? AND ativo = 1', [loja_id]);
+    const [abaixoMinimo] = await conectar.execute('SELECT COUNT(*) AS abaixo FROM produtos WHERE loja_id = ? AND ativo = 1 AND quantidade <= estoque_minimo', [loja_id]);
+
     const [caixa] = await conectar.execute(`
       SELECT
         SUM(CASE WHEN forma_pagamento = 'dinheiro' THEN total ELSE 0 END) AS dinheiro,
