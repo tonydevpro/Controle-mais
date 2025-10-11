@@ -1,5 +1,112 @@
 const conectar = require('../banco/conexao');
+const { sendMail } = require('../utils/email');
+const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
+
+const TOKEN_EXPIRATION_MINUTES = 60; // token válido por 60 minutos
+
+// Exibe formulário para solicitar reset (email)
+exports.formEsqueciSenha = (req, res) => {
+  res.render('auth/esqueciSenha', { erro: null, sucesso: null });
+};
+
+// Gera token, salva e envia link para email
+exports.enviarLinkReset = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.render('auth/esqueciSenha', { erro: 'Informe o e-mail.', sucesso: null });
+
+  try {
+    const [usuarios] = await conectar.execute('SELECT id, email, nome FROM usuarios WHERE email = ?', [email.toLowerCase()]);
+    if (usuarios.length === 0) {
+      // Não revelar se email existe — show success anyway to avoid enumeration
+      return res.render('auth/esqueciSenha', { erro: null, sucesso: 'Se este e-mail existir no sistema, você receberá um link para redefinir a senha.' });
+    }
+
+    const usuario = usuarios[0];
+
+    // gerar token
+    const token = uuidv4() + '-' + Math.random().toString(36).slice(2, 8);
+    const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION_MINUTES * 60 * 1000);
+
+    // opcional: deletar tokens antigos do usuário
+    await conectar.execute('DELETE FROM password_resets WHERE usuario_id = ?', [usuario.id]);
+
+    // salvar token
+    await conectar.execute('INSERT INTO password_resets (usuario_id, token, expires_at) VALUES (?, ?, ?)', [usuario.id, token, expiresAt]);
+
+    // montar link
+    const appUrl = process.env.APP_URL || `http://${req.headers.host}`;
+    const link = `${appUrl}/resetar-senha?token=${encodeURIComponent(token)}`;
+
+    // enviar email
+    const html = `
+      <p>Olá ${usuario.nome || ''},</p>
+      <p>Recebemos uma solicitação para redefinir sua senha. Clique no link abaixo para criar uma nova senha. Este link expira em ${TOKEN_EXPIRATION_MINUTES} minutos.</p>
+      <p><a href="${link}">Redefinir minha senha</a></p>
+      <p>Se você não solicitou essa alteração, ignore este e-mail.</p>
+    `;
+
+    await sendMail({ to: usuario.email, subject: 'Redefinir senha - Controle+', html });
+
+    res.render('auth/esqueciSenha', { erro: null, sucesso: 'Se esse e-mail existir, um link para redefinir a senha foi enviado.' });
+  } catch (err) {
+    console.error('Erro ao enviar link reset:', err);
+    res.render('auth/esqueciSenha', { erro: 'Erro ao processar solicitação. Tente novamente mais tarde.', sucesso: null });
+  }
+};
+
+// Mostrar formulário onde usuário informa nova senha (token na query)
+exports.formResetarSenha = async (req, res) => {
+  const token = req.query.token;
+  if (!token) return res.status(400).send('Token inválido.');
+
+  try {
+    const [rows] = await conectar.execute('SELECT * FROM password_resets WHERE token = ? AND used = 0 LIMIT 1', [token]);
+    if (rows.length === 0) return res.status(400).send('Token inválido ou expirado.');
+
+    const pr = rows[0];
+    if (new Date(pr.expires_at) < new Date()) {
+      return res.status(400).send('Token expirado.');
+    }
+
+    res.render('auth/resetarSenha', { token, erro: null });
+  } catch (err) {
+    console.error('Erro em formResetarSenha:', err);
+    res.status(500).send('Erro interno.');
+  }
+};
+
+// Processar mudança de senha
+exports.processarResetSenha = async (req, res) => {
+  const { token, senha, senha_confirm } = req.body;
+  if (!token) return res.status(400).send('Token ausente.');
+  if (!senha || senha.length < 4) return res.render('auth/resetarSenha', { token, erro: 'Senha muito curta (mínimo 4 caracteres).' });
+  if (senha !== senha_confirm) return res.render('auth/resetarSenha', { token, erro: 'Senhas não coincidem.' });
+
+  try {
+    const [rows] = await conectar.execute('SELECT * FROM password_resets WHERE token = ? AND used = 0 LIMIT 1', [token]);
+    if (rows.length === 0) return res.status(400).send('Token inválido ou já utilizado.');
+
+    const pr = rows[0];
+    if (new Date(pr.expires_at) < new Date()) {
+      return res.status(400).send('Token expirado.');
+    }
+
+    // atualizar senha do usuário
+    const hash = await bcrypt.hash(senha, 10);
+    await conectar.execute('UPDATE usuarios SET senha = ? WHERE id = ?', [hash, pr.usuario_id]);
+
+    // invalidar token (marcar usado)
+    await conectar.execute('UPDATE password_resets SET used = 1 WHERE id = ?', [pr.id]);
+
+    res.render('auth/resetarSenhaSucesso');
+  } catch (err) {
+    console.error('Erro ao processar reset senha:', err);
+    res.status(500).send('Erro interno.');
+  }
+};
+
 
 // Formulário de login
 exports.formLogin = (req, res) => {

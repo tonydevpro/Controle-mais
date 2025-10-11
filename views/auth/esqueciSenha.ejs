@@ -1,0 +1,11 @@
+<%- include('../partials/header', { usuario: usuario }) %>
+<main>
+  <h1>Esqueci a senha</h1>
+  <% if (erro) { %><p style="color:red"><%= erro %></p><% } %>
+  <% if (sucesso) { %><p style="color:green"><%= sucesso %></p><% } %>
+  <form method="POST" action="/esqueci-senha">
+    <label>Email: <input type="email" name="email" required></label>
+    <button type="submit">Enviar link</button>
+  </form>
+</main>
+<%- include('../partials/footer') %>
