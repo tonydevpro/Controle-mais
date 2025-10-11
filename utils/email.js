@@ -25,19 +25,32 @@ if (provider === 'gmail') {
     },
     tls: { ciphers: 'SSLv3' }
   });
+} else if (provider === 'brevo') {
+  transporter = nodemailer.createTransport({
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.BREVO_USER,
+      pass: process.env.BREVO_PASS
+    }
+  });
 } else {
-  throw new Error('EMAIL_PROVIDER inválido. Use gmail ou outlook.');
+  throw new Error('EMAIL_PROVIDER inválido. Use gmail, outlook ou brevo.');
 }
 
 async function sendMail({ to, subject, html, text }) {
-  const from = `${process.env.FROM_EMAIL_CONTROLE || process.env.GMAIL_USER} `;
+  const from = `"${process.env.FROM_NAME || 'Controle+'}" <${process.env.FROM_EMAIL || process.env.GMAIL_USER || process.env.OUTLOOK_USER || process.env.BREVO_USER}>`;
+
   const info = await transporter.sendMail({
-    from: `"Controle+" <${process.env.FROM_EMAIL_CONTROLE || (provider === 'gmail' ? process.env.GMAIL_USER : process.env.OUTLOOK_USER)}>`,
+    from,
     to,
     subject,
     text,
     html
   });
+
+  console.log('✅ Email enviado:', info.messageId);
   return info;
 }
 
