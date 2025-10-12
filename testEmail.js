@@ -1,15 +1,16 @@
-// testEmail.js
+require('dotenv').config();
 const { sendMail } = require('./utils/email');
 
 (async () => {
   try {
     await sendMail({
-      to: 'seuemail@exemplo.com',
-      subject: 'Teste de SMTP Brevo no Railway',
-      html: '<h2>Funcionou! 🎉</h2><p>O envio via Brevo está ativo.</p>'
+      to: 'seuemail@gmail.com',
+      subject: 'Teste via Brevo API 🚀',
+      html: '<h2>Envio funcionando via API Brevo!</h2>'
     });
-    console.log('Email enviado com sucesso!');
+    console.log('✅ Email enviado com sucesso!');
   } catch (err) {
-    console.error('Erro ao enviar:', err);
+    console.error('❌ Erro:', err.message);
   }
 })();
+// Para rodar: node testEmail.js
