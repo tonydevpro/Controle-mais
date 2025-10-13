@@ -1,5 +1,7 @@
 // utils/email.js
 require('dotenv').config();
+console.log('Usando chave Brevo:', process.env.BREVO_API_KEY);
+
 const axios = require('axios');
 
 async function sendMail({ to, subject, html, text }) {
@@ -9,7 +11,7 @@ async function sendMail({ to, subject, html, text }) {
       {
         sender: {
           name: process.env.FROM_NAME || 'Controle+',
-          email: process.env.FROM_EMAIL || '990f19001@smtp-brevo.com'
+          email: process.env.FROM_EMAIL || 'suporte.loges@gmail.com'
         },
         to: [{ email: to }],
         subject,
