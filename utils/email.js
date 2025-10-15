@@ -1,4 +1,4 @@
-// ARQUIVO: utils/email.js (COM DEBUG AGRESSIVO)
+// ARQUIVO: utils/email.js (COM DEBUG COMPLETO)
 // ============================================
 
 const axios = require('axios');
@@ -13,18 +13,20 @@ async function sendMail({ to, subject, html, text }) {
   // DEBUG DETALHADO
   console.log('🔍 [EMAIL DEBUG]');
   console.log(`   ├─ BREVO_API_KEY definida: ${!!apiKey}`);
-  console.log(`   ├─ Tamanho da chave: ${apiKey ? apiKey.length : 'N/A'}`);
+  if (apiKey) {
+    console.log(`   ├─ Tamanho da chave: ${apiKey.length} caracteres`);
+    console.log(`   ├─ Primeiros 15 chars: ${apiKey.substring(0, 15)}`);
+  }
   console.log(`   ├─ From Email: ${fromEmail}`);
   console.log(`   ├─ From Name: ${fromName}`);
   console.log(`   └─ Destinatário: ${to}`);
 
-  if (!apiKey) {
-    console.error('\n❌ [EMAIL ERRO] BREVO_API_KEY não definida!');
-    console.error('   Valor de process.env.BREVO_API_KEY:', process.env.BREVO_API_KEY);
+  if (!apiKey || apiKey === 'undefined' || apiKey.trim() === '') {
+    console.error('\n❌ [EMAIL ERRO] BREVO_API_KEY não definida ou vazia!');
+    console.error('   Valor:', JSON.stringify(process.env.BREVO_API_KEY));
     console.error('   Type:', typeof process.env.BREVO_API_KEY);
     
     const erro = new Error('BREVO_API_KEY não configurada nas variáveis de ambiente');
-    console.error('   Stack:', erro.stack);
     throw erro;
   }
 
@@ -43,14 +45,14 @@ async function sendMail({ to, subject, html, text }) {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'api-key': apiKey
+      'api-key': apiKey.trim() // ← Remove espaços extras
     },
     timeout: 10000
   };
 
   console.log('📤 [EMAIL] Enviando requisição...');
   console.log(`   ├─ URL: https://api.brevo.com/v3/smtp/email`);
-  console.log(`   ├─ Headers api-key: ${config.headers['api-key'].substring(0, 10)}...`);
+  console.log(`   ├─ Headers api-key definida: ${!!config.headers['api-key']}`);
   console.log(`   └─ Payload tamanho: ${JSON.stringify(payload).length} bytes`);
 
   try {
@@ -74,7 +76,7 @@ async function sendMail({ to, subject, html, text }) {
     console.error(`\nHeaders enviados:`);
     console.error(`  - api-key: ${error.config?.headers['api-key'] ? 'SIM' : 'NÃO DEFINIDA'}`);
     console.error(`  - Content-Type: ${error.config?.headers['Content-Type']}`);
-    console.error(`\nTodo erro:`, error.message);
+    console.error(`\nErro completo:`, error.message);
     console.error('━'.repeat(60) + '\n');
     
     throw error;

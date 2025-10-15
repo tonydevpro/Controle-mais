@@ -1,4 +1,4 @@
-// ARQUIVO: app.js (DEBUG COMPLETO)
+// ARQUIVO: app.js (VERSÃO CORRIGIDA - SEM CONNECT-MONGO)
 // ============================================
 
 console.log('🔍 [STARTUP] Iniciando aplicação...');
@@ -34,13 +34,11 @@ const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 
+// ✅ MANTÉM O MEMORYSTORE COMO ANTES (sem connect-mongo)
 app.use(session({ 
   secret: 'controlemais_supersegredo', 
   resave: false, 
-  saveUninitialized: false,
-  store: new (require('connect-mongo'))({
-    url: process.env.MONGODB_URI || 'mongodb://localhost/controle-mais'
-  }) // ← Considerando usar sesión store em produção
+  saveUninitialized: false
 }));
 
 app.use(flash());
@@ -87,11 +85,13 @@ app.get('/debug-env', (req, res) => {
   const brevoKey = process.env.BREVO_API_KEY;
   res.json({
     brevo_key_defined: !!brevoKey,
+    brevo_key_length: brevoKey ? brevoKey.length : 0,
     brevo_key_first_10_chars: brevoKey ? brevoKey.substring(0, 10) : 'UNDEFINED',
     from_email: process.env.FROM_EMAIL,
     from_name: process.env.FROM_NAME,
     app_url: process.env.APP_URL,
     node_env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
   });
 });
 
