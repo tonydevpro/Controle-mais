@@ -1,40 +1,60 @@
-// ARQUIVO: app.js (VERSÃO CORRIGIDA - SEM CONNECT-MONGO)
+// ============================================
+// ARQUIVO: app.js (VERSÃO SUPER SIMPLES PARA DEBUG)
 // ============================================
 
-console.log('🔍 [STARTUP] Iniciando aplicação...');
-console.log('🔍 [STARTUP] NODE_ENV:', process.env.NODE_ENV);
+// NÃO carregue dotenv aqui na nuvem
+// require('dotenv').config();
 
-// Carregar variáveis PRIMEIRO
-require('dotenv').config();
+console.log('\n' + '═'.repeat(70));
+console.log('🔍 TESTE DE VARIÁVEIS DE AMBIENTE');
+console.log('═'.repeat(70));
 
-console.log('\n🔍 [DEBUG] Todas as variáveis de ambiente:');
-console.log('━'.repeat(60));
+// TESTE 1: Listar TUDO
+console.log('\n📋 TESTE 1: Todas as variáveis (primeiros 50 chars de cada):');
+console.log('─'.repeat(70));
 Object.keys(process.env)
-  .filter(key => key.includes('BREVO') || key.includes('EMAIL') || key.includes('FROM') || key.includes('MYSQL'))
+  .sort()
   .forEach(key => {
     const valor = process.env[key];
-    const mascarado = valor ? `${valor.substring(0, 10)}...` : 'UNDEFINED';
-    console.log(`  ${key}: ${mascarado}`);
+    const display = valor.length > 50 ? valor.substring(0, 50) + '...' : valor;
+    console.log(`${key}: ${display}`);
   });
-console.log('━'.repeat(60));
 
-// Verificação crítica
-const chaveBrevo = process.env.BREVO_API_KEY;
-if (!chaveBrevo) {
-  console.error('\n❌ CRÍTICO: BREVO_API_KEY não encontrada!');
-  console.error('Verifique em Railway → Variables');
-  console.error('A chave deve estar exatamente como: BREVO_API_KEY=xxx_sua_chave_xxx\n');
-} else {
-  console.log('\n✅ BREVO_API_KEY carregada com sucesso!\n');
-}
+// TESTE 2: Variável específica
+console.log('\n' + '─'.repeat(70));
+console.log('📋 TESTE 2: Variável BREVO_API_KEY específica:');
+console.log('─'.repeat(70));
+const brevoKey = process.env.BREVO_API_KEY;
+console.log(`Valor: ${brevoKey}`);
+console.log(`Type: ${typeof brevoKey}`);
+console.log(`Definida: ${!!brevoKey}`);
+console.log(`Tamanho: ${brevoKey ? brevoKey.length : 0}`);
+console.log(`Primeiros 20 chars: ${brevoKey ? brevoKey.substring(0, 20) : 'N/A'}`);
 
+// TESTE 3: Variáveis relacionadas
+console.log('\n' + '─'.repeat(70));
+console.log('📋 TESTE 3: Todas as variáveis que contêm "BREVO" ou "EMAIL":');
+console.log('─'.repeat(70));
+Object.keys(process.env)
+  .filter(key => key.toUpperCase().includes('BREVO') || key.toUpperCase().includes('EMAIL') || key.toUpperCase().includes('FROM'))
+  .forEach(key => {
+    console.log(`${key}: ${process.env[key]}`);
+  });
+
+console.log('\n' + '═'.repeat(70) + '\n');
+
+// Agora sim, carregar o express
 const express = require('express');
 const app = express();
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-// ✅ MANTÉM O MEMORYSTORE COMO ANTES (sem connect-mongo)
+// ✅ Carrega dotenv AQUI para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 app.use(session({ 
   secret: 'controlemais_supersegredo', 
   resave: false, 
@@ -80,18 +100,28 @@ app.use('/movimentacoes', rotaMovimentacoes);
 app.use('/produtos', rotaProdutos);
 app.use('/pdv', rotaPdv);
 
-// ⚠️ ROTA DE DEBUG TEMPORÁRIA
+// 🧪 ROTA DE DEBUG
 app.get('/debug-env', (req, res) => {
   const brevoKey = process.env.BREVO_API_KEY;
+  const todasVars = {};
+  
+  Object.keys(process.env).forEach(key => {
+    if (key.includes('BREVO') || key.includes('EMAIL') || key.includes('FROM') || key.includes('MYSQL') || key.includes('APP')) {
+      todasVars[key] = process.env[key];
+    }
+  });
+
   res.json({
-    brevo_key_defined: !!brevoKey,
-    brevo_key_length: brevoKey ? brevoKey.length : 0,
-    brevo_key_first_10_chars: brevoKey ? brevoKey.substring(0, 10) : 'UNDEFINED',
-    from_email: process.env.FROM_EMAIL,
-    from_name: process.env.FROM_NAME,
-    app_url: process.env.APP_URL,
+    timestamp: new Date().toISOString(),
     node_env: process.env.NODE_ENV,
-    timestamp: new Date().toISOString()
+    brevo_api_key: {
+      definida: !!brevoKey,
+      tamanho: brevoKey ? brevoKey.length : 0,
+      primeiros_20_chars: brevoKey ? brevoKey.substring(0, 20) : 'UNDEFINED',
+      tipo: typeof brevoKey,
+      valor_completo: brevoKey // ⚠️ Cuidado: isto mostra a chave! Remova em produção!
+    },
+    todas_variaveis_relevantes: todasVars
   });
 });
 
@@ -118,6 +148,5 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n✅ Servidor rodando em http://localhost:${PORT}`);
-  console.log(`📧 Email service: ${process.env.BREVO_API_KEY ? '✅ Pronto' : '❌ Não configurado'}\n`);
+  console.log(`✅ Servidor rodando na porta ${PORT}`);
 });
