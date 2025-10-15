@@ -1,9 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
-require('dotenv').config();
+
 
 app.use(session({ secret: 'controlemais_supersegredo', resave: false, saveUninitialized: false }));
 

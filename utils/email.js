@@ -1,5 +1,4 @@
 // utils/email.js
-require('dotenv').config();
 console.log('Usando chave Brevo:', process.env.BREVO_API_KEY);
 
 const axios = require('axios');
