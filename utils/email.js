@@ -6,7 +6,7 @@ const axios = require('axios');
 async function sendMail({ to, subject, html, text }) {
   console.log('\n📧 [EMAIL] Iniciando envio...');
   
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = process.env.SENDGRID_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || 'suporte.loges@gmail.com';
   const fromName = process.env.FROM_NAME || 'Controle+';
 
@@ -23,8 +23,8 @@ async function sendMail({ to, subject, html, text }) {
 
   if (!apiKey || apiKey === 'undefined' || apiKey.trim() === '') {
     console.error('\n❌ [EMAIL ERRO] BREVO_API_KEY não definida ou vazia!');
-    console.error('   Valor:', JSON.stringify(process.env.BREVO_API_KEY));
-    console.error('   Type:', typeof process.env.BREVO_API_KEY);
+    console.error('   Valor:', JSON.stringify(process.env.SENDGRID_API_KEY));
+    console.error('   Type:', typeof process.env.SENDGRID_API_KEY);
     
     const erro = new Error('BREVO_API_KEY não configurada nas variáveis de ambiente');
     throw erro;
