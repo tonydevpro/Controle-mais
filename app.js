@@ -1,59 +1,61 @@
 // ============================================
-// ARQUIVO: app.js (VERSÃO SUPER SIMPLES PARA DEBUG)
+// ARQUIVO: app.js (SOLUÇÃO FINAL)
 // ============================================
 
-// NÃO carregue dotenv aqui na nuvem
-// require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
-console.log('\n' + '═'.repeat(70));
-console.log('🔍 TESTE DE VARIÁVEIS DE AMBIENTE');
-console.log('═'.repeat(70));
+console.log('\n🔍 [STARTUP] Inicializando variáveis de ambiente...');
 
-// TESTE 1: Listar TUDO
-console.log('\n📋 TESTE 1: Todas as variáveis (primeiros 50 chars de cada):');
-console.log('─'.repeat(70));
-Object.keys(process.env)
-  .sort()
-  .forEach(key => {
-    const valor = process.env[key];
-    const display = valor.length > 50 ? valor.substring(0, 50) + '...' : valor;
-    console.log(`${key}: ${display}`);
-  });
+// ✅ Tenta carregar .env.production PRIMEIRO (Railway vai preferir isto)
+const envProductionPath = path.join(__dirname, '.env.production');
+if (fs.existsSync(envProductionPath)) {
+  console.log('📁 Encontrado: .env.production');
+  require('dotenv').config({ path: envProductionPath });
+} else {
+  console.log('📁 Não encontrado: .env.production');
+  // ✅ Se não existir, tenta .env
+  require('dotenv').config({ path: path.join(__dirname, '.env') });
+}
 
-// TESTE 2: Variável específica
-console.log('\n' + '─'.repeat(70));
-console.log('📋 TESTE 2: Variável BREVO_API_KEY específica:');
-console.log('─'.repeat(70));
-const brevoKey = process.env.BREVO_API_KEY;
-console.log(`Valor: ${brevoKey}`);
-console.log(`Type: ${typeof brevoKey}`);
-console.log(`Definida: ${!!brevoKey}`);
-console.log(`Tamanho: ${brevoKey ? brevoKey.length : 0}`);
-console.log(`Primeiros 20 chars: ${brevoKey ? brevoKey.substring(0, 20) : 'N/A'}`);
+// ✅ FALLBACK: Se BREVO_API_KEY não foi carregada, tenta outras variáveis
+if (!process.env.BREVO_API_KEY) {
+  console.log('⚠️  BREVO_API_KEY não encontrada, tentando alternativas...');
+  
+  // Tenta SENDGRID_API_KEY
+  if (process.env.SENDGRID_API_KEY) {
+    process.env.BREVO_API_KEY = process.env.SENDGRID_API_KEY;
+    console.log('✅ Usando SENDGRID_API_KEY como BREVO_API_KEY');
+  }
+  // Tenta EMAIL_API_KEY
+  else if (process.env.EMAIL_API_KEY) {
+    process.env.BREVO_API_KEY = process.env.EMAIL_API_KEY;
+    console.log('✅ Usando EMAIL_API_KEY como BREVO_API_KEY');
+  }
+  // Tenta API_KEY
+  else if (process.env.API_KEY) {
+    process.env.BREVO_API_KEY = process.env.API_KEY;
+    console.log('✅ Usando API_KEY como BREVO_API_KEY');
+  }
+}
 
-// TESTE 3: Variáveis relacionadas
-console.log('\n' + '─'.repeat(70));
-console.log('📋 TESTE 3: Todas as variáveis que contêm "BREVO" ou "EMAIL":');
-console.log('─'.repeat(70));
-Object.keys(process.env)
-  .filter(key => key.toUpperCase().includes('BREVO') || key.toUpperCase().includes('EMAIL') || key.toUpperCase().includes('FROM'))
-  .forEach(key => {
-    console.log(`${key}: ${process.env[key]}`);
-  });
+// ✅ ÚLTIMO FALLBACK: Variável hardcoded para Railway (TEMPORÁRIO)
+if (!process.env.BREVO_API_KEY && process.env.NODE_ENV === 'production') {
+  console.log('⚠️  Nenhuma variável de email encontrada em produção!');
+  console.log('💡 Dica: Adicione BREVO_API_KEY nas Variables do Railway');
+}
 
-console.log('\n' + '═'.repeat(70) + '\n');
+// Debug final
+console.log('\n📊 [STARTUP] Status das variáveis:');
+console.log(`   NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`   BREVO_API_KEY: ${process.env.BREVO_API_KEY ? '✅ Carregada' : '❌ Falta'}`);
+console.log(`   FROM_EMAIL: ${process.env.FROM_EMAIL || 'padrão'}`);
+console.log('');
 
-// Agora sim, carregar o express
 const express = require('express');
 const app = express();
-const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
-
-// ✅ Carrega dotenv AQUI para desenvolvimento local
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
 
 app.use(session({ 
   secret: 'controlemais_supersegredo', 
@@ -102,26 +104,12 @@ app.use('/pdv', rotaPdv);
 
 // 🧪 ROTA DE DEBUG
 app.get('/debug-env', (req, res) => {
-  const brevoKey = process.env.BREVO_API_KEY;
-  const todasVars = {};
-  
-  Object.keys(process.env).forEach(key => {
-    if (key.includes('BREVO') || key.includes('EMAIL') || key.includes('FROM') || key.includes('MYSQL') || key.includes('APP')) {
-      todasVars[key] = process.env[key];
-    }
-  });
-
   res.json({
     timestamp: new Date().toISOString(),
     node_env: process.env.NODE_ENV,
-    brevo_api_key: {
-      definida: !!brevoKey,
-      tamanho: brevoKey ? brevoKey.length : 0,
-      primeiros_20_chars: brevoKey ? brevoKey.substring(0, 20) : 'UNDEFINED',
-      tipo: typeof brevoKey,
-      valor_completo: brevoKey // ⚠️ Cuidado: isto mostra a chave! Remova em produção!
-    },
-    todas_variaveis_relevantes: todasVars
+    brevo_api_key_defined: !!process.env.BREVO_API_KEY,
+    brevo_api_key_length: process.env.BREVO_API_KEY?.length || 0,
+    brevo_api_key_preview: process.env.BREVO_API_KEY ? process.env.BREVO_API_KEY.substring(0, 15) + '...' : 'UNDEFINED',
   });
 });
 
