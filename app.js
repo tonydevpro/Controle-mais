@@ -1,4 +1,16 @@
-require('dotenv').config();
+const path = require('path');
+
+// ✅ SEMPRE carregar .env.production se existir
+require('dotenv').config({ path: path.join(__dirname, '.env.production') });
+
+// Se não existir, tenta .env
+if (!process.env.BREVO_API_KEY) {
+  require('dotenv').config({ path: path.join(__dirname, '.env') });
+}
+
+console.log(`✅ BREVO_API_KEY: ${process.env.BREVO_API_KEY ? '✅ Carregada' : '❌ Falta'}`);
+
+// ... resto igual
 
 const express = require('express');
 const app = express();
