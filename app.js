@@ -1,5 +1,3 @@
-const path = require('path');
-
 // ✅ SEMPRE carregar .env.production se existir
 require('dotenv').config({ path: path.join(__dirname, '.env.production') });
 
