@@ -8,7 +8,7 @@ npm-debug.log*
 
 # Ignora variáveis de ambiente
 .env
-.env.*  
+#.env.*  
 
 # Ignora pastas temporárias
 tmp/
