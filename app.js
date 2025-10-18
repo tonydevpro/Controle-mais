@@ -1,3 +1,5 @@
+const path = require('path');
+
 // ✅ SEMPRE carregar .env.production se existir
 require('dotenv').config({ path: path.join(__dirname, '.env.production') });
 
@@ -12,7 +14,6 @@ console.log(`✅ BREVO_API_KEY: ${process.env.BREVO_API_KEY ? '✅ Carregada' : 
 
 const express = require('express');
 const app = express();
-const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
 
